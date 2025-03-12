@@ -22,6 +22,7 @@ class IntersectionModel(Model):
             "E": (9, 5),
             "W": (0, 6),
         }
+        self.next_agent_id = 4
 
         # Create Intersection Manager
         self.intersection_manager = IntersectionManager(99, self)
@@ -33,5 +34,18 @@ class IntersectionModel(Model):
             self.grid.place_agent(agent, pos)
             self.schedule.add(agent)
 
+    def spawn_vehicles(self):
+        """Spawn new vehicles at entry points with a 1/4 probability if space is free."""
+        for direction, pos in self.entry_points.items():
+            if random.random() < 0.05:  # 5% chance
+                if not self.grid.is_cell_empty(pos):
+                    continue  # Don't spawn if space is occupied
+
+                new_vehicle = VehicleAgent(self.next_agent_id, self, direction)
+                self.grid.place_agent(new_vehicle, pos)
+                self.schedule.add(new_vehicle)
+                self.next_agent_id += 1  # Ensure unique ID
+
     def step(self):
         self.schedule.step()
+        self.spawn_vehicles()
