@@ -1,6 +1,6 @@
 from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
-from models.intersection import IntersectionModel
+from ainter.models.intersection import IntersectionModel
 
 def vehicle_portrayal(agent):
     if agent is None:

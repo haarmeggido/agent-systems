@@ -1,8 +1,8 @@
 from mesa import Model
 from mesa.space import MultiGrid
 from mesa.time import SimultaneousActivation
-from models.intersection_manager import IntersectionManager
-from models.vehicle import VehicleAgent
+from ainter.models.intersection_manager import IntersectionManager
+from ainter.models.vehicle import VehicleAgent
 import random
 
 class IntersectionModel(Model):
