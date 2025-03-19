@@ -1,0 +1,39 @@
+python-implementation = "CPython"
+
+[project]
+name = "agent-systems"
+version = "0.0.0.1"
+requires-python = ">=3.12.9"
+authors = [
+    { name="Miłosz Górlaczyk", email="abc@abc.com" },   # It wolud not install the project if simply the dots were present :)
+    { name="Dominik Breksa", email="dominikbreksa@gmail.com" },
+]
+description = "Autonomous intersection model solved using reinforcement learning"
+dynamic = ["dependencies"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: Unix",
+]
+
+[project.urls]
+Homepage = "https://github.com/haarmeggido/agent-systems"
+Repository = "https://github.com/haarmeggido/agent-systems.git"
+Issues = "https://github.com/haarmeggido/agent-systems/issues"
+
+[project.scripts]
+run-mesa = "ainter.run:main"
+
+[build-system]
+requires = ["setuptools>=75.8.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.pytest.ini_options]
+addopts = [
+    "--cov=ainter",
+    "--cov-report=term-missing",
+]
+testpaths = ["test"]

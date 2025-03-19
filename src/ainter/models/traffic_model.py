@@ -1,8 +1,8 @@
 from mesa import Model
 from mesa.space import MultiGrid
 from mesa.time import RandomActivation
-from models.vehicle import VehicleAgent
-from models.intersection_manager import IntersectionManager
+from ainter.models.vehicle import VehicleAgent
+from ainter.models.intersection_manager import IntersectionManager
 
 class TrafficModel(Model):
     def __init__(self, width=10, height=10, num_vehicles=4):
