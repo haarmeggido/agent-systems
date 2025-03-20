@@ -5,7 +5,7 @@ name = "agent-systems"
 version = "0.0.0.1"
 requires-python = ">=3.12.9"
 authors = [
-    { name="Miłosz Górlaczyk", email="abc@abc.com" },   # It wolud not install the project if simply the dots were present :)
+    { name="Miłosz Górlaczyk", email="goralczyk.milosz2k@gmail.com" },   
     { name="Dominik Breksa", email="dominikbreksa@gmail.com" },
 ]
 description = "Autonomous intersection model solved using reinforcement learning"
