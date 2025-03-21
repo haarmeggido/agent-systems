@@ -36,5 +36,8 @@ addopts = [
     "--cov=ainter",
     "--cov-report=term-missing",
     "--import-mode=importlib",
+    "-ra",
+    "-q",
 ]
 testpaths = ["test"]
+pythonpath = ["src"]

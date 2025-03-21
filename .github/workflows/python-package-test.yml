@@ -1,0 +1,28 @@
+name: Project Python Package Testing
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    branches:
+      - 'main'
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    name: Build & install the package and then run tests
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: ./requirements.txt
+      - name: Run the installation script
+        run: |
+          chmod +x ./scripts/setup.sh
+          ./scripts/setup.sh
+      - name: Test the code
+        run: |
+          chmod +x ./scripts/test.sh
+          ./scripts/test.sh
