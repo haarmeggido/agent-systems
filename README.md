@@ -1,5 +1,7 @@
 # Project for Agent Systems Course at AGH University
 
+[![Python Package Testing](https://github.com/haarmeggido/agent-systems/actions/workflows/python-package-test.yml/badge.svg)](https://github.com/haarmeggido/agent-systems/actions/workflows/python-package-test.yml)
+
 Implementation of an Autonomous intersection model that is solved by agents using reinforcement learning technics.
 
 ### Authors
