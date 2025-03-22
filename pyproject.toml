@@ -22,7 +22,7 @@ Repository = "https://github.com/haarmeggido/agent-systems.git"
 Issues = "https://github.com/haarmeggido/agent-systems/issues"
 
 [project.scripts]
-run-mesa = "ainter.run:main"
+autonomus-intersection = "ainter.main:main"
 
 [build-system]
 requires = ["setuptools>=75.8.0"]
