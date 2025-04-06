@@ -85,3 +85,6 @@ dmypy.json
 .pytype/
 cython_debug/
 .idea/
+
+# my venv directory
+/agent-systems-env
