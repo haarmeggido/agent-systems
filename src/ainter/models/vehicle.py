@@ -40,9 +40,9 @@ class VehicleAgent(Agent):
         elif self.direction == "S":
             return (x, y - self.speed)  # Move down
         elif self.direction == "E":
-            return (x - self.speed, y)  # Move left instead of right
+            return (x - self.speed, y)  # Move left 
         elif self.direction == "W":
-            return (x + self.speed, y)  # Move right instead of left
+            return (x + self.speed, y)  # Move right 
         return (x, y)
 
     def is_out_of_bounds(self, pos):
