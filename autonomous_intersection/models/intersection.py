@@ -37,7 +37,7 @@ class IntersectionModel(Model):
     def spawn_vehicles(self):
         """Spawn new vehicles at entry points with a 1/4 probability if space is free."""
         for direction, pos in self.entry_points.items():
-            if random.random() < 0.05:  # 5% chance
+            if random.random() < 0.04:  # 3% chance
                 if not self.grid.is_cell_empty(pos):
                     continue  # Don't spawn if space is occupied
 
