@@ -3,15 +3,15 @@ from typing import Final
 import numpy as np
 
 
-type PhysicalTime = np.float64              # In seconds
-type PhysicalLength = np.float64            # In meters
-type PhysicalSpeed = np.float64             # In meters per seconds
-type PhysicalAcceleration = np.float64      # In meters per second squared
+type PhysicalTime = np.float64 | float          # In seconds
+type PhysicalLength = np.float64 | float        # In meters
+type PhysicalSpeed = np.float64 | float         # In meters per seconds
+type PhysicalAcceleration = np.float64 | float  # In meters per second squared
 
-type DiscreteTime = np.uint32               # In time step
-type DiscreteLength = np.uint16             # In the number of grid cells
-type DiscreteSpeed = np.uint8               # In grid cells per time steps
-type DiscreteAcceleration = np.uint8        # In grid cells per time step squared
+type DiscreteTime = np.uint32                   # In time step
+type DiscreteLength = np.uint16                 # In the number of grid cells
+type DiscreteSpeed = np.int8                    # In grid cells per time steps
+type DiscreteAcceleration = np.int8             # In grid cells per time step squared
 
 DELTA_TIME: Final[PhysicalTime] = np.float64(0.5)
 
@@ -25,13 +25,13 @@ ACCELERATION_MIN: Final[PhysicalAcceleration] = np.float64(-1.5)
 
 
 def discretize_length(length: PhysicalLength) -> DiscreteLength:
-    """Converts the physical length measure into discrete Length value"""
-    return np.uint16(np.ceil(length / CELL_SIZE))
+    """Converts the physical length measure into discrete length value"""
+    return np.uint16(np.round(length / CELL_SIZE))
 
 def discretize_speed(speed: PhysicalSpeed) -> DiscreteSpeed:
-    """Converts the physical length measure into discrete Length value"""
-    pass
+    """Converts the physical speed measure into discrete speed value"""
+    return np.int8(np.round(speed * DELTA_TIME / CELL_SIZE))
 
 def discretize_acceleration(acceleration: PhysicalAcceleration) -> DiscreteAcceleration:
     """Converts the physical length measure into discrete Length value"""
-    pass
+    return np.int8(np.round(acceleration * DELTA_TIME * DELTA_TIME / CELL_SIZE))
