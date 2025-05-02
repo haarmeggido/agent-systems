@@ -9,12 +9,14 @@ import osmnx as ox
 from ainter.io.cmd.command import CMDCommand
 from ainter.configs.env_creation import EnvConfig
 from ainter.models.nagel_schreckenberg.environment import Environment
+from ainter.models.vehicles.vehicle import Vehicle
 
 
 class CreateModelCommand(CMDCommand):
 
     def __init__(self) -> None:
         ox.settings.use_cache = False
+        ox.settings.log_console = False
 
     def configure_parser(self, subparser) -> ArgumentParser:
         parser: ArgumentParser = subparser.add_parser(name='create_model',
@@ -38,13 +40,13 @@ class CreateModelCommand(CMDCommand):
     def __call__(self, args: Namespace) -> None:
         config = self.process_input(args.input)
         G = self.get_data_from_osm(config)
-        print(G.adj[236160006][264345061][0])
         env = Environment.from_directed_graph(G)
+        vehicles = [Vehicle.from_random() for _ in range(config.vehicles.max_count)]
         print('AAA')
 
     def process_input(self, input_file) -> EnvConfig:
-        data = json.loads(''.join(input_file.readlines()), object_hook=EnvConfig.from_json)
+        data = json.load(input_file, object_hook=EnvConfig.from_json)
         return data
 
     def get_data_from_osm(self, config: EnvConfig) -> nx.MultiDiGraph:
-        return ox.graph.graph_from_bbox(dataclasses.astuple(config), network_type='drive')
+        return ox.graph.graph_from_bbox(dataclasses.astuple(config.map_box), network_type='drive')
