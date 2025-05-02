@@ -88,3 +88,6 @@ cython_debug/
 
 # my venv directory
 /agent-systems-env
+
+# images
+*.png
