@@ -8,7 +8,7 @@ type PhysicalLength = np.float64 | float        # In meters
 type PhysicalSpeed = np.float64 | float         # In meters per seconds
 type PhysicalAcceleration = np.float64 | float  # In meters per second squared
 
-type DiscreteTime = np.uint32                   # In time step
+type DiscreteTime = np.uint32 | int             # In time step
 type DiscreteLength = np.uint16                 # In the number of grid cells
 type DiscreteSpeed = np.int8                    # In grid cells per time steps
 type DiscreteAcceleration = np.int8             # In grid cells per time step squared
@@ -35,3 +35,6 @@ def discretize_speed(speed: PhysicalSpeed) -> DiscreteSpeed:
 def discretize_acceleration(acceleration: PhysicalAcceleration) -> DiscreteAcceleration:
     """Converts the physical length measure into discrete Length value"""
     return np.int8(np.round(acceleration * DELTA_TIME * DELTA_TIME / CELL_SIZE))
+
+def reconstruct_length(length: DiscreteLength) -> PhysicalLength:
+    return np.float64(length * CELL_SIZE)

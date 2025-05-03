@@ -13,13 +13,22 @@ class TimeDensity(ABC):
 class NormalTimeDensity(TimeDensity):
 
     def get_probability(self, time: DiscreteTime) -> float:
-        pass
+        raise NotImplemented
+
+
+class UniformTimeDensity(TimeDensity):
+
+    def get_probability(self, time: DiscreteTime) -> float:
+        return 0.1
 
 
 def get_time_density_strategy(code: str) -> TimeDensity:
     match code:
         case "normal_dist":
             return NormalTimeDensity()
+
+        case "uniform_dist":
+            return UniformTimeDensity()
 
         case _:
             raise ValueError("Unknown strategy code provided")

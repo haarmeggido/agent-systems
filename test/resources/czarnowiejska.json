@@ -11,6 +11,6 @@
   },
   "vehicles": {
     "max_count": 500,
-    "time_density_strategy": "normal_dist"
+    "time_density_strategy": "uniform_dist"
   }
 }

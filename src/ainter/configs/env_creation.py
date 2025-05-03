@@ -36,6 +36,9 @@ class MapBoxConfig:
                    right=float(json_data['right']),
                    top=float(json_data['top']))
 
+    def get_bbox(self) -> tuple[float, float, float, float]:
+        return self.left, self.bottom, self.right, self.top
+
 
 @dataclass(slots=True, frozen=True)
 class VehiclesConfig:
