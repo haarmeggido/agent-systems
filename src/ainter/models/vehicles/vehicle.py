@@ -1,14 +1,12 @@
 from dataclasses import dataclass, field
 from enum import auto, IntEnum
 from random import choices, random, choice
-from typing import Self
 
 import networkx as nx
 
 from ainter.models.data.osmnx import bfs_shortest_path
-from ainter.models.nagel_schreckenberg.time import TimeDensity
 from ainter.models.nagel_schreckenberg.units import discretize_length, discretize_speed, discretize_acceleration, \
-    DiscreteLength, DiscreteSpeed, DiscreteAcceleration, DiscreteTime
+    DiscreteLength, DiscreteSpeed, DiscreteAcceleration, DiscreteTime, TimeDensity
 
 
 @dataclass(slots=True, frozen=True)
@@ -74,17 +72,16 @@ class VehicleType(IntEnum):
 class Vehicle:
     id: int
     type: VehicleType
-    # TODO: consider only storing a characteristic id and not an characteristic object for every vehicle
-    characteristic: VehicleCharacteristic = field(init=False)
     speed: DiscreteSpeed = field(init=False)
     start_time: DiscreteTime
-    from_node: int
-    to_node: int
+    from_node: int = field(init=False)
+    to_node: int = field(init=False)
     path: list[int]
 
     def __post_init__(self) -> None:
-        self.characteristic = self.type.get_characteristic()
         self.speed = discretize_speed(0.)
+        self.from_node = self.path[0]
+        self.to_node = self.path[-1]
 
 
 def generate_vehicles(graph: nx.MultiDiGraph,
@@ -97,9 +94,13 @@ def generate_vehicles(graph: nx.MultiDiGraph,
 
     for time_step in range(start_time, end_time):
         if random() < probability.get_probability(time_step):
-            start_node = choice(list(graph.nodes))
-            # TODO: Check if a node does not have any descendants
-            end_node = choice(list(nx.descendants(graph, start_node)))
+            while True:
+                start_node = choice(list(graph.nodes))
+                end_node_possibilities = list(nx.descendants(graph, start_node))
+                if len(end_node_possibilities) > 0:
+                    break
+
+            end_node = choice(end_node_possibilities)
 
             path = bfs_shortest_path(graph, start_node, end_node)
 
@@ -109,8 +110,6 @@ def generate_vehicles(graph: nx.MultiDiGraph,
                 id=idx,
                 type=vehicle_type,
                 start_time=time_step,
-                from_node=start_node,
-                to_node=end_node,
                 path=path,
             ))
             idx += 1

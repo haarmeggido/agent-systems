@@ -2,6 +2,7 @@ import dataclasses
 import json
 from argparse import ArgumentParser, FileType, Namespace
 from pathlib import Path
+from random import seed
 
 import networkx as nx
 import osmnx as ox
@@ -35,10 +36,17 @@ class CreateModelCommand(CMDCommand):
                             nargs='?',
                             dest='output',
                             required=True)
+        parser.add_argument('--seed',
+                            help='Seed for the randomness involved in the model creation',
+                            type=int,
+                            nargs='?',
+                            dest='seed')
 
         return parser
 
     def __call__(self, args: Namespace) -> None:
+        if args.seed:
+            seed(args.seed)
         config = self.process_input(args.input)
         model = Model.from_config(config)
         print('AAA')

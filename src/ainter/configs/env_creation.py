@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Any, Self
 from datetime import time
 
-from ainter.models.nagel_schreckenberg.time import TimeDensity, get_time_density_strategy
+from ainter.models.nagel_schreckenberg.units import TimeDensity, get_time_density_strategy
 
 
 @dataclass(slots=True, frozen=True)
