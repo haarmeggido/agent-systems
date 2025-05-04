@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from enum import auto, IntEnum
 from random import choices, random, choice
 
-import networkx as nx
+from networkx import DiGraph, descendants
 
 from ainter.models.data.osmnx import bfs_shortest_path
 from ainter.models.nagel_schreckenberg.units import discretize_length, discretize_speed, discretize_acceleration, \
@@ -84,7 +84,7 @@ class Vehicle:
         self.to_node = self.path[-1]
 
 
-def generate_vehicles(graph: nx.MultiDiGraph,
+def generate_vehicles(graph: DiGraph,
                       start_time: DiscreteTime,
                       end_time: DiscreteTime,
                       probability: TimeDensity) -> list[Vehicle]:
@@ -96,7 +96,7 @@ def generate_vehicles(graph: nx.MultiDiGraph,
         if random() < probability.get_probability(time_step):
             while True:
                 start_node = choice(list(graph.nodes))
-                end_node_possibilities = list(nx.descendants(graph, start_node))
+                end_node_possibilities = list(descendants(graph, start_node))
                 if len(end_node_possibilities) > 0:
                     break
 
