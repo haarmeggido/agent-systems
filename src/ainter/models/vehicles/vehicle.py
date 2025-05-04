@@ -1,12 +1,16 @@
 from dataclasses import dataclass, field
 from enum import auto, IntEnum
 from random import choices, random, choice
+from typing import Optional
 
+import numpy as np
 from networkx import DiGraph, descendants
 
 from ainter.models.data.osmnx import bfs_shortest_path
 from ainter.models.nagel_schreckenberg.units import discretize_length, discretize_speed, discretize_acceleration, \
     DiscreteLength, DiscreteSpeed, DiscreteAcceleration, DiscreteTime, TimeDensity
+
+type VehicleId = np.uint16
 
 
 @dataclass(slots=True, frozen=True)
@@ -70,18 +74,20 @@ class VehicleType(IntEnum):
 
 @dataclass(slots=True)
 class Vehicle:
-    id: int
+    id: VehicleId
     type: VehicleType
     speed: DiscreteSpeed = field(init=False)
     start_time: DiscreteTime
     from_node: int = field(init=False)
     to_node: int = field(init=False)
     path: list[int]
+    location: Optional[int | tuple[int, int]]     # node (intersection) or edge (Road)
 
     def __post_init__(self) -> None:
         self.speed = discretize_speed(0.)
         self.from_node = self.path[0]
         self.to_node = self.path[-1]
+        self.location = None
 
 
 def generate_vehicles(graph: DiGraph,
@@ -90,7 +96,7 @@ def generate_vehicles(graph: DiGraph,
                       probability: TimeDensity) -> list[Vehicle]:
     vehicles = []
     types = list(VehicleType)
-    idx = 0
+    idx = np.uint16(0)
 
     for time_step in range(start_time, end_time):
         if random() < probability.get_probability(time_step):

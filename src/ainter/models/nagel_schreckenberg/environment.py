@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Self
 
-import networkx as nx
 from networkx.classes import MultiDiGraph, DiGraph
 
 from ainter.models.nagel_schreckenberg.intersection import Intersection

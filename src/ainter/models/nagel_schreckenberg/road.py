@@ -10,6 +10,7 @@ from ainter.models.nagel_schreckenberg.units import discretize_length, PhysicalL
 
 @dataclass(slots=True, frozen=True)
 class Road:
+    """Equivalent of a mesa space"""
     osm_id: int
     grid: np.ndarray
     lanes: int
@@ -38,7 +39,7 @@ class Road:
                                                                      [end_node_info['x'], end_node_info['y']]]))
 
         return cls(osm_id=osm_id,
-                   grid=np.zeros(shape=(cells_num, lanes), dtype=np.uint8),
+                   grid=np.zeros(shape=(cells_num, lanes), dtype=np.uint16),
                    lanes=lanes,
                    max_speed=max_speed,
                    name=name,

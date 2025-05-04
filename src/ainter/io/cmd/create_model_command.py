@@ -49,12 +49,10 @@ class CreateModelCommand(CMDCommand):
             seed(args.seed)
         config = self.process_input(args.input)
         model = Model.from_config(config)
-
-
-
-
-
-        print('AAA')
+        time_step = 0
+        while time_step < 1_000:
+            model.step()
+            time_step += 1
 
     def process_input(self, input_file) -> EnvConfig:
         data = json.load(input_file, object_hook=EnvConfig.from_json)

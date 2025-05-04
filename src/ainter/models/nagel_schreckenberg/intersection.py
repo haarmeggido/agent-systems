@@ -6,6 +6,7 @@ import numpy as np
 
 @dataclass(slots=True, frozen=True)
 class Intersection:
+    """Equivalent of a mesa space"""
     osm_id: int
     grid: np.ndarray
 
@@ -13,4 +14,4 @@ class Intersection:
     def from_graph_data(cls, osm_id: int,
                         node_info: dict[str, Any]) -> Self:
         return cls(osm_id=osm_id,
-                   grid=np.zeros(shape=(10, 10), dtype=np.uint8))
+                   grid=np.zeros(shape=(10, 10), dtype=np.uint16)) # np.uint16 is VehicleId
