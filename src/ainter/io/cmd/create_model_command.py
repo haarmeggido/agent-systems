@@ -49,6 +49,11 @@ class CreateModelCommand(CMDCommand):
             seed(args.seed)
         config = self.process_input(args.input)
         model = Model.from_config(config)
+
+
+
+
+
         print('AAA')
 
     def process_input(self, input_file) -> EnvConfig:
