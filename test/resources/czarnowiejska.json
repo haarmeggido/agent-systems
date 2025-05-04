@@ -1,6 +1,16 @@
 {
-  "left": 19.912119,
-  "bottom": 50.066637,
-  "right": 19.921871,
-  "top": 50.069047
+  "physics": {
+    "start_time": "08:00:00",
+    "end_time": "20:00:00"
+  },
+  "map_box": {
+    "left": 19.912119,
+    "bottom": 50.066637,
+    "right": 19.921871,
+    "top": 50.069047
+  },
+  "vehicles": {
+    "max_count": 500,
+    "time_density_strategy": "uniform_dist"
+  }
 }

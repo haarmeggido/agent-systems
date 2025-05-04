@@ -2,6 +2,7 @@ import dataclasses
 import json
 from argparse import ArgumentParser, FileType, Namespace
 from pathlib import Path
+from random import seed
 
 import networkx as nx
 import osmnx as ox
@@ -9,12 +10,15 @@ import osmnx as ox
 from ainter.io.cmd.command import CMDCommand
 from ainter.configs.env_creation import EnvConfig
 from ainter.models.nagel_schreckenberg.environment import Environment
+from ainter.models.nagel_schreckenberg.model import Model
+from ainter.models.vehicles.vehicle import Vehicle
 
 
 class CreateModelCommand(CMDCommand):
 
     def __init__(self) -> None:
         ox.settings.use_cache = False
+        ox.settings.log_console = False
 
     def configure_parser(self, subparser) -> ArgumentParser:
         parser: ArgumentParser = subparser.add_parser(name='create_model',
@@ -32,19 +36,21 @@ class CreateModelCommand(CMDCommand):
                             nargs='?',
                             dest='output',
                             required=True)
+        parser.add_argument('--seed',
+                            help='Seed for the randomness involved in the model creation',
+                            type=int,
+                            nargs='?',
+                            dest='seed')
 
         return parser
 
     def __call__(self, args: Namespace) -> None:
+        if args.seed:
+            seed(args.seed)
         config = self.process_input(args.input)
-        G = self.get_data_from_osm(config)
-        print(G.adj[236160006][264345061][0])
-        env = Environment.from_directed_graph(G)
+        model = Model.from_config(config)
         print('AAA')
 
     def process_input(self, input_file) -> EnvConfig:
-        data = json.loads(''.join(input_file.readlines()), object_hook=EnvConfig.from_json)
+        data = json.load(input_file, object_hook=EnvConfig.from_json)
         return data
-
-    def get_data_from_osm(self, config: EnvConfig) -> nx.MultiDiGraph:
-        return ox.graph.graph_from_bbox(dataclasses.astuple(config), network_type='drive')
