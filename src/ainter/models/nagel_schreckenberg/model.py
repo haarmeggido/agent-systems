@@ -17,7 +17,7 @@ class Model:
     def from_config(cls, config: EnvConfig) -> Self:
         graph = get_data_from_bbox(config.map_box)
         env = Environment.from_directed_graph(graph)
-        vehicles = generate_vehicles(graph,
+        vehicles = generate_vehicles(env.road_graph,
                                      discretize_time(config.physics.start_time),
                                      discretize_time(config.physics.end_time),
                                      config.vehicles.time_density_strategy)
