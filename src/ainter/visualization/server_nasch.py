@@ -78,4 +78,4 @@ server = ModularServer(
     }
 )
 
-server.port = 8521  
+server.port = 8522 

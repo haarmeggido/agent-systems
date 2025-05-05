@@ -15,7 +15,9 @@ class NaSchUrbanModel(Model):
         self.schedule = SimultaneousActivation(self)
         graph = get_data_from_bbox(config.map_box)
         env = Environment.from_directed_graph(graph)
+        self.env = env
         self.space = RoadNetworkSpace(env)
+        self.G = env.road_graph
 
         self.vehicle_agents = []
         vehicles = generate_vehicles(env.road_graph,
@@ -23,10 +25,12 @@ class NaSchUrbanModel(Model):
                                      discretize_time(config.physics.end_time),
                                      config.vehicles.time_density_strategy)
         for v in vehicles:
-            agent = VehicleAgent(v.id, self, v)
-            self.vehicle_agents.append(agent)
-            self.schedule.add(agent)
-            self.space.place_agent(agent, v.from_node)
+            VehicleAgent.create_agents(model = self, n = 1, unique_id = v.id, vehicle = v)
+            # agent = VehicleAgent(v.id, self, v)
+            # self.vehicle_agents.append(agent)
+            # self.schedule.add(agent)
+            # self.space.place_agent(agent, v.from_node)
+            print(self.agents) 
 
     def step(self):
         self.schedule.step()

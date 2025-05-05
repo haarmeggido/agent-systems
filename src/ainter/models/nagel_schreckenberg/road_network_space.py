@@ -7,7 +7,7 @@ from ainter.models.nagel_schreckenberg.intersection import Intersection
 class RoadNetworkSpace(NetworkGrid):
     def __init__(self, environment: Environment):
         # Initialize base NetworkGrid with road graph
-        print(type(environment))
+        print(environment.road_graph.nodes)
         super().__init__(environment.road_graph)
 
         # Store roads and intersections for easy access
@@ -24,7 +24,6 @@ class RoadNetworkSpace(NetworkGrid):
 
     def get_agents_on_road(self, start: int, end: int) -> list:
         """Get all agents currently on the road (approximate by nodes for now)."""
-        # Optionally: implement finer segment tracking if needed
         return [agent for agent in self.get_all_cell_contents(start)
                 if getattr(agent, "to_node", None) == end]
 
