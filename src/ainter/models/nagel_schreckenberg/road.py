@@ -5,7 +5,8 @@ import numpy as np
 from shapely import LineString
 
 from ainter.models.nagel_schreckenberg.units import discretize_length, PhysicalLength, DEFAULT_ROAD_MAX_SPEED, \
-    PhysicalSpeed
+    PhysicalSpeed, DiscreteSpeed, discretize_speed, DiscreteLength
+from ainter.models.vehicles.vehicle import VehicleId
 
 
 @dataclass(slots=True, frozen=True)
@@ -46,3 +47,17 @@ class Road:
                    reversed=is_reversed,
                    length=length,
                    geometry=geometry)
+
+    def add_agent(self, agent_id: VehicleId, lane: int, length: DiscreteLength) -> None:
+        if lane < 0 or lane > self.lanes:
+            raise ValueError("Incorrect lane number provided")
+
+        if length < 0 or length > discretize_length(self.length):
+            raise ValueError("Length isd either negative or the agent des not fit into the road")
+
+        if np.any(self.grid == agent_id):
+            raise ValueError("Cannot add the agent twice to a road")
+
+    def move_agents(self, id: VehicleId, speed: DiscreteSpeed) -> None:
+        if speed > discretize_speed(self.max_speed):
+            raise ValueError("Too big speed reached")

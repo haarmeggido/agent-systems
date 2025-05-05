@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from random import randint
 from typing import Self
 
 from ainter.configs.env_creation import EnvConfig
@@ -43,16 +44,18 @@ class Model:
         for agent_id in self.active_agent_indexes:
             agent = self.agents[agent_id]
 
-            if agent.location is None:
-                agent.location = agent.from_node
-            elif isinstance(agent.location, int):  # Immediately teleport agent to the next road segment
+            if agent.is_on_intersection():  # Immediately teleport agent to the next road segment
                 current_journey_index = agent.path.index(agent.location)
-                agent.location = (agent.path[current_journey_index], agent.path[current_journey_index])
+                agent.location = (agent.path[current_journey_index], agent.path[current_journey_index + 1])
                 road = self.environment.roads[agent.location]
-                # lane =
-                # road.add_agent(agent_id=...,
-                #                lane=...,
-                #                length=...,
-                #                )
-            else:  # Check if on the next timestep the agent will touch the end of the road line
-                pass
+                road.add_agent(agent_id=agent.id,
+                               lane=randint(0, road.lanes),
+                               length=agent.type.get_characteristic().length)
+
+            elif agent.is_on_road():  # Check if on the next timestep the agent will touch the end of the road line
+                road = self.environment.roads[agent.location]
+                road.move_agent()
+            else:
+                agent.location = agent.from_node
+
+        self.time += 1
