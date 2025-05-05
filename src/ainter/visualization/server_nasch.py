@@ -51,9 +51,10 @@ def create_network_portrayal(env: Environment):
 
 
 # Create a test configuration
-config = EnvConfig.default()  # Replace with actual default() method or manually build if needed
+config = EnvConfig.from_json("test\resources\czarnowiejska.json") # Is it right??
+
 test_env = Environment.from_directed_graph(
-    get_data_from_bbox(config.map_box)
+    get_data_from_bbox(config.map_box) # Finished with error here, 11:13
 )
 
 network_portrayal = create_network_portrayal(test_env)

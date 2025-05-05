@@ -1,6 +1,6 @@
 from mesa import Agent
 
-from ainter.models.vehicle import Vehicle
+from ainter.models.vehicles.vehicle import Vehicle
 
 class VehicleAgent(Agent):
     def __init__(self, unique_id, model, vehicle: Vehicle):

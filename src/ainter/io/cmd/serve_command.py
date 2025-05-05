@@ -8,7 +8,7 @@ class ServeCommand(CMDCommand):
 
     def configure_parser(self, subparser) -> ArgumentParser:
         parser: ArgumentParser = subparser.add_parser(name='serve',
-                                                      help='Runs the MESA server')
+                                                      help='Runs the MESA server for intersection example')
         return parser
 
     def __call__(self, args: Namespace) -> None:
