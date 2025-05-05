@@ -23,6 +23,3 @@ class Model:
                                      config.vehicles.time_density_strategy)
         return cls(environment=env,
                    agents=vehicles)
-
-    def update_simulation(self) -> None:
-        pass

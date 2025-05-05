@@ -11,9 +11,6 @@ def create_program_parser() -> ArgumentParser:
     parser = ArgumentParser()
     subparsers = parser.add_subparsers(help='List of possible subcommands',
                                        required=True)
-    serve_command = ServeCommand()
-    serve_command_parser = serve_command.configure_parser(subparsers)
-    serve_command_parser.set_defaults(func=serve_command)
 
     create_model_command = CreateModelCommand()
     create_model_parser = create_model_command.configure_parser(subparsers)
