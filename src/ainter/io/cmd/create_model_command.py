@@ -11,6 +11,7 @@ from ainter.io.cmd.command import CMDCommand
 from ainter.configs.env_creation import EnvConfig
 from ainter.models.nagel_schreckenberg.environment import Environment
 from ainter.models.nagel_schreckenberg.model import Model
+from ainter.models.nagel_schreckenberg.units import discretize_time
 from ainter.models.vehicles.vehicle import Vehicle
 
 
@@ -48,11 +49,11 @@ class CreateModelCommand(CMDCommand):
         if args.seed:
             seed(args.seed)
         config = self.process_input(args.input)
-        # model = Model.from_config(config)
+        model = Model.from_config(config)
 
-
-
-
+        # Run simulation
+        for time in range(discretize_time(config.physics.start_time), discretize_time(config.physics.end_time)):
+            model.step()
 
         print('AAA')
 

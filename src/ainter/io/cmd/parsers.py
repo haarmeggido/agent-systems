@@ -1,7 +1,6 @@
 from argparse import ArgumentParser
 
 from ainter.io.cmd.create_model_command import CreateModelCommand
-from ainter.io.cmd.serve_command import ServeCommand
 from ainter.io.cmd.visualize_command import VisualizeCommand
 
 
