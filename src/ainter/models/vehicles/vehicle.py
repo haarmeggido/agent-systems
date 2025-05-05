@@ -102,7 +102,7 @@ def generate_vehicles(graph: DiGraph,
                       probability: TimeDensity) -> list[Vehicle]:
     vehicles = []
     types = list(VehicleType)
-    idx = np.uint16(0)
+    idx = np.uint16(1)
 
     for time_step in range(start_time, end_time):
         if random() < probability.get_probability(time_step):
