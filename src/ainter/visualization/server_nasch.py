@@ -9,6 +9,8 @@ from ainter.models.nagel_schreckenberg.road_network_space import RoadNetworkSpac
 from ainter.models.nagel_schreckenberg.model_mesa import NaSchUrbanModel
 from ainter.models.data.osmnx import get_data_from_bbox
 
+import json
+
 def vehicle_portrayal(agent):
     if agent is None or not hasattr(agent, "vehicle"):
         return
@@ -51,10 +53,12 @@ def create_network_portrayal(env: Environment):
 
 
 # Create a test configuration
-config = EnvConfig.from_json("test\resources\czarnowiejska.json") # Is it right??
+with open("../test/resources/czarnowiejska.json", "r") as f:
+    config = json.load(f, object_hook=EnvConfig.from_json)
+
 
 test_env = Environment.from_directed_graph(
-    get_data_from_bbox(config.map_box) # Finished with error here, 11:13
+    get_data_from_bbox(config.map_box) 
 )
 
 network_portrayal = create_network_portrayal(test_env)
@@ -74,4 +78,4 @@ server = ModularServer(
     }
 )
 
-server.port = 8521  # Default port
+server.port = 8521  

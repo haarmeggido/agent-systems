@@ -41,6 +41,3 @@ class Environment:
         return cls(road_graph=graph_di,
                    roads=roads,
                    intersections=intersections)
-
-    def add_agent(self, agent: Vehicle) -> None:
-        pass

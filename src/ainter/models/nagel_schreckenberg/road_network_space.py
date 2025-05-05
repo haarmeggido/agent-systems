@@ -7,6 +7,7 @@ from ainter.models.nagel_schreckenberg.intersection import Intersection
 class RoadNetworkSpace(NetworkGrid):
     def __init__(self, environment: Environment):
         # Initialize base NetworkGrid with road graph
+        print(type(environment))
         super().__init__(environment.road_graph)
 
         # Store roads and intersections for easy access

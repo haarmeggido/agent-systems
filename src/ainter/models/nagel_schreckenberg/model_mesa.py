@@ -15,7 +15,7 @@ class NaSchUrbanModel(Model):
         self.schedule = SimultaneousActivation(self)
         graph = get_data_from_bbox(config.map_box)
         env = Environment.from_directed_graph(graph)
-        self.space = RoadNetworkSpace(env.road_graph)
+        self.space = RoadNetworkSpace(env)
 
         self.vehicle_agents = []
         vehicles = generate_vehicles(env.road_graph,
