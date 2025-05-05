@@ -13,4 +13,4 @@ class Intersection:
     def from_graph_data(cls, osm_id: int,
                         node_info: dict[str, Any]) -> Self:
         return cls(osm_id=osm_id,
-                   grid=np.zeros(shape=(10, 10), dtype=np.uint8))
+                   grid=np.zeros(shape=(10, 10), dtype=np.uint16))
