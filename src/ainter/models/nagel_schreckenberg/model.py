@@ -1,10 +1,10 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Self
 
 from ainter.configs.env_creation import EnvConfig
 from ainter.models.data.osmnx import get_data_from_bbox
 from ainter.models.nagel_schreckenberg.environment import Environment
-from ainter.models.nagel_schreckenberg.units import discretize_time
+from ainter.models.nagel_schreckenberg.units import discretize_time, DiscreteTime
 from ainter.models.vehicles.vehicle import Vehicle, generate_vehicles
 
 
@@ -12,6 +12,13 @@ from ainter.models.vehicles.vehicle import Vehicle, generate_vehicles
 class Model:
     environment: Environment
     agents: list[Vehicle]
+    active_agent_indexes: list[int] = field(init=False)
+    last_index: int = field(init=False)
+    time: DiscreteTime
+
+    def __post_init__(self) -> None:
+        self.active_agent_indexes = []
+        self.last_index = 0
 
     @classmethod
     def from_config(cls, config: EnvConfig) -> Self:
@@ -22,4 +29,30 @@ class Model:
                                      discretize_time(config.physics.end_time),
                                      config.vehicles.time_density_strategy)
         return cls(environment=env,
-                   agents=vehicles)
+                   agents=vehicles,
+                   time=discretize_time(config.physics.start_time))
+
+    def step(self) -> None:
+        # For now, ignore intersections
+
+        # Add all agents spawned at this timestep
+        while self.agents[self.last_index].start_time <= self.time:
+            self.active_agent_indexes.append(self.last_index)
+            self.last_index += 1
+
+        for agent_id in self.active_agent_indexes:
+            agent = self.agents[agent_id]
+
+            if agent.location is None:
+                agent.location = agent.from_node
+            elif isinstance(agent.location, int):  # Immediately teleport agent to the next road segment
+                current_journey_index = agent.path.index(agent.location)
+                agent.location = (agent.path[current_journey_index], agent.path[current_journey_index])
+                road = self.environment.roads[agent.location]
+                # lane =
+                # road.add_agent(agent_id=...,
+                #                lane=...,
+                #                length=...,
+                #                )
+            else:  # Check if on the next timestep the agent will touch the end of the road line
+                pass

@@ -17,3 +17,4 @@ class VisualizeCommand(CMDCommand):
     
     def __init__(self):
          ox.settings.use_cache = False
+         ox.settings.log_console = False

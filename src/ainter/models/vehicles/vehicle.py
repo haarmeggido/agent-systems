@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from enum import auto, IntEnum
 from random import choices, random, choice
+from typing import Optional
 
 from networkx import DiGraph, descendants
 
@@ -77,11 +78,19 @@ class Vehicle:
     from_node: int = field(init=False)
     to_node: int = field(init=False)
     path: list[int]
+    location: Optional[int | tuple[int, int]] = field(init=False)  # node (intersection) or edge (Road)
 
     def __post_init__(self) -> None:
         self.speed = discretize_speed(0.)
         self.from_node = self.path[0]
         self.to_node = self.path[-1]
+        self.location = None
+
+    def is_on_intersection(self) -> bool:
+        return isinstance(self.location, int)
+
+    def is_on_road(self) -> bool:
+        return isinstance(self.location, tuple)
 
 
 def generate_vehicles(graph: DiGraph,

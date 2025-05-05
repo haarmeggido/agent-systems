@@ -48,7 +48,7 @@ class CreateModelCommand(CMDCommand):
         if args.seed:
             seed(args.seed)
         config = self.process_input(args.input)
-        model = Model.from_config(config)
+        # model = Model.from_config(config)
 
 
 
