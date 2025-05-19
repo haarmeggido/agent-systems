@@ -15,9 +15,9 @@ type DiscreteLength = np.uint16                 # In the number of grid cells
 type DiscreteSpeed = np.int8                    # In grid cells per time steps
 type DiscreteAcceleration = np.int8             # In grid cells per time step squared
 
-DELTA_TIME: Final[float] = np.float64(0.5)
+DELTA_TIME: Final[float] = np.float64(1.)
 
-CELL_SIZE: Final[PhysicalLength] = np.float64(0.25)
+CELL_SIZE: Final[PhysicalLength] = np.float64(2.)
 LINE_WIDTH: Final[PhysicalLength] = np.float32(3.)
 
 SPEED_MAX: Final[PhysicalSpeed] = np.float64(50)
@@ -47,19 +47,19 @@ def discretize_acceleration(acceleration: PhysicalAcceleration) -> DiscreteAccel
 class TimeDensity(ABC):
 
     @abstractmethod
-    def get_probability(self, t: DiscreteTime) -> float:
+    def __call__(self, t: DiscreteTime) -> float:
         pass
 
 
 class NormalTimeDensity(TimeDensity):
 
-    def get_probability(self, t: DiscreteTime) -> float:
+    def __call__(self, t: DiscreteTime) -> float:
         raise NotImplemented
 
 
 class UniformTimeDensity(TimeDensity):
 
-    def get_probability(self, t: DiscreteTime) -> float:
+    def __call__(self, t: DiscreteTime) -> float:
         return 0.1
 
 

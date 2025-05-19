@@ -11,6 +11,8 @@ from ainter.models.nagel_schreckenberg.units import discretize_length, discretiz
     DiscreteLength, DiscreteSpeed, DiscreteAcceleration, DiscreteTime, TimeDensity
 
 type VehicleId = np.uint16
+type RoadPosition = tuple[int, slice]
+type IntersectionPosition = tuple[slice, slice]
 
 
 @dataclass(slots=True, frozen=True)
@@ -82,12 +84,14 @@ class Vehicle:
     to_node: int = field(init=False)
     path: list[int]
     location: Optional[int | tuple[int, int]] = field(init=False)  # node (intersection) or edge (Road)
+    grid_position: Optional[RoadPosition | IntersectionPosition]
 
     def __post_init__(self) -> None:
         self.speed = discretize_speed(0.)
         self.from_node = self.path[0]
         self.to_node = self.path[-1]
         self.location = None
+        self.grid_position = None
 
     def is_on_intersection(self) -> bool:
         return isinstance(self.location, int)
@@ -105,7 +109,7 @@ def generate_vehicles(graph: DiGraph,
     idx = np.uint16(1)
 
     for time_step in range(start_time, end_time):
-        if random() < probability.get_probability(time_step):
+        if random() < probability(time_step):
             while True:
                 start_node = choice(list(graph.nodes))
                 end_node_possibilities = list(descendants(graph, start_node))

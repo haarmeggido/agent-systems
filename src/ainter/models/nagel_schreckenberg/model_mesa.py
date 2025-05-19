@@ -1,5 +1,5 @@
 from mesa import Model
-from mesa.time import SimultaneousActivation
+# from mesa.time import SimultaneousActivation
 
 from ainter.configs.env_creation import EnvConfig
 from ainter.models.data.osmnx import get_data_from_bbox
@@ -10,9 +10,9 @@ from ainter.models.vehicles.vehicle_mesa import VehicleAgent
 from ainter.models.nagel_schreckenberg.road_network_space import RoadNetworkSpace
 
 class NaSchUrbanModel(Model):
-    def __init__(self, config: EnvConfig):
+    def __init__(self, config: EnvConfig, seed=None) -> None:
         super().__init__()
-        self.schedule = SimultaneousActivation(self)
+        # self.schedule = SimultaneousActivation(self)
         graph = get_data_from_bbox(config.map_box)
         env = Environment.from_directed_graph(graph)
         self.env = env
@@ -33,4 +33,5 @@ class NaSchUrbanModel(Model):
             print(self.agents) 
 
     def step(self):
-        self.schedule.step()
+        # self.schedule.step()
+        pass

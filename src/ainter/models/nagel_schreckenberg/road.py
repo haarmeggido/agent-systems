@@ -33,6 +33,7 @@ class Road:
         cells_num = discretize_length(length.astype(np.float32))
         max_speed = float(edge_info.get('max_speed', DEFAULT_ROAD_MAX_SPEED))
         name = edge_info.get('name', None)
+        name = name if name != '' else None
         is_oneway = edge_info['oneway']
         is_reversed = edge_info['reversed']
         geometry = edge_info.get('geometry', LineString(coordinates=[[start_node_info['x'], start_node_info['y']],
@@ -58,6 +59,12 @@ class Road:
         if np.any(self.grid == agent_id):
             raise ValueError("Cannot add the agent twice to a road")
 
+    def is_agent_leaving(self, agent_id: VehicleId, speed: DiscreteSpeed) -> bool:
+        pass
+
     def move_agents(self, id: VehicleId, speed: DiscreteSpeed) -> None:
         if speed > discretize_speed(self.max_speed):
             raise ValueError("Too big speed reached")
+
+    def render(self) -> np.ndarray:
+        return self.grid.T

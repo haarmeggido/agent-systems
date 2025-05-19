@@ -5,3 +5,9 @@ numpy==2.2.4
 networkx[default]==3.4.2
 osmnx==2.0.1
 shapely==2.0.7
+uvicorn~=0.34.2
+starlette~=0.46.2
+matplotlib~=3.10.1
+solara~=1.47.0
+pandas~=2.2.3
+setuptools~=78.1.1

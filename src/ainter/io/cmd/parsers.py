@@ -1,6 +1,5 @@
 from argparse import ArgumentParser
 
-from ainter.io.cmd.create_model_command import CreateModelCommand
 from ainter.io.cmd.visualize_command import VisualizeCommand
 
 
@@ -10,10 +9,6 @@ def create_program_parser() -> ArgumentParser:
     parser = ArgumentParser()
     subparsers = parser.add_subparsers(help='List of possible subcommands',
                                        required=True)
-
-    create_model_command = CreateModelCommand()
-    create_model_parser = create_model_command.configure_parser(subparsers)
-    create_model_parser.set_defaults(func=create_model_command)
 
     visualize_command = VisualizeCommand()
     visualize_command_parser = visualize_command.configure_parser(subparsers)

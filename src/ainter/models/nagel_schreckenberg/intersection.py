@@ -3,6 +3,9 @@ from typing import Self, Any
 
 import numpy as np
 
+from ainter.models.nagel_schreckenberg.units import DiscreteSpeed
+from ainter.models.vehicles.vehicle import VehicleId
+
 
 @dataclass(slots=True, frozen=True)
 class Intersection:
@@ -11,6 +14,13 @@ class Intersection:
 
     @classmethod
     def from_graph_data(cls, osm_id: int,
+                        in_edges_info: dict[tuple[int, int], Any],
                         node_info: dict[str, Any]) -> Self:
         return cls(osm_id=osm_id,
                    grid=np.zeros(shape=(10, 10), dtype=np.uint16))
+
+    def is_agent_leaving(self, agent_id: VehicleId, speed: DiscreteSpeed) -> bool:
+        return True
+
+    def render(self) -> np.ndarray:
+        return self.grid
