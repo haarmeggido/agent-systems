@@ -76,7 +76,6 @@ class VehicleType(IntEnum):
 
 @dataclass(slots=True)
 class Vehicle:
-    id: VehicleId
     type: VehicleType
     speed: DiscreteSpeed = field(init=False)
     start_time: DiscreteTime
@@ -84,14 +83,14 @@ class Vehicle:
     to_node: int = field(init=False)
     path: list[int]
     location: Optional[int | tuple[int, int]] = field(init=False)  # node (intersection) or edge (Road)
-    grid_position: Optional[RoadPosition | IntersectionPosition]
+    inner_position: Optional[RoadPosition | IntersectionPosition]
 
     def __post_init__(self) -> None:
         self.speed = discretize_speed(0.)
         self.from_node = self.path[0]
         self.to_node = self.path[-1]
         self.location = None
-        self.grid_position = None
+        self.inner_position = None
 
     def is_on_intersection(self) -> bool:
         return isinstance(self.location, int)

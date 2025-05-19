@@ -11,13 +11,17 @@ from ainter.models.vehicles.vehicle import VehicleId
 class Intersection:
     osm_id: int
     grid: np.ndarray
+    x: float
+    y: float
 
     @classmethod
     def from_graph_data(cls, osm_id: int,
                         in_edges_info: dict[tuple[int, int], Any],
                         node_info: dict[str, Any]) -> Self:
         return cls(osm_id=osm_id,
-                   grid=np.zeros(shape=(10, 10), dtype=np.uint16))
+                   grid=np.zeros(shape=(10, 10), dtype=np.uint16),
+                   x=node_info['x'],
+                   y=node_info['y'])
 
     def is_agent_leaving(self, agent_id: VehicleId, speed: DiscreteSpeed) -> bool:
         return True

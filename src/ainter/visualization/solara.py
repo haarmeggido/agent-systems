@@ -1,22 +1,15 @@
+import math
 from typing import Optional, Any
 
 import matplotlib.pyplot as plt
 import networkx as nx
-import numpy as np
 import osmnx as ox
 import solara
-import math
-from mesa import Agent
-from mesa import Model
-from mesa.datacollection import DataCollector
-from mesa.examples.basic.boltzmann_wealth_model.agents import MoneyAgent
-from mesa.space import MultiGrid
 from mesa.visualization import SolaraViz
 from mesa.visualization.utils import update_counter
 
 from ainter.configs.env_creation import EnvConfig
 from ainter.models.nagel_schreckenberg.model import NaSchUrbanModel
-from ainter.models.nagel_schreckenberg.units import discretize_length
 
 plt.rcParams['axes.facecolor'] = 'none'
 plt.rcParams['figure.facecolor'] = 'none'
@@ -53,10 +46,15 @@ def network_portrayal(model):
                               node_color='blue',
                               edge_color='black',
                               node_size=65)
+
     for edge_data in model.grid.roads.values():
         text = edge_data.name
         c = edge_data.geometry.centroid
         axis.annotate(text, (c.x, c.y), c="blue", ha='center', va='center')
+
+    for node_id, node_data in model.grid.intersections.items():
+        text = str(node_id)
+        axis.annotate(text, (node_data.x, node_data.y), c="orange", ha='center', va='center')
 
     fig.tight_layout()
     solara.FigureMatplotlib(fig)
@@ -68,9 +66,6 @@ def intersections_portrayal(model):
     intersections_dict = model.grid.intersections
     roads_dict = model.grid.roads
     road_graph = model.grid.road_graph
-    if not intersections_dict:
-        solara.Markdown("No intersections available.")
-        return
 
     num_intersections = len(intersections_dict)
     cols = 3
@@ -85,8 +80,8 @@ def intersections_portrayal(model):
 
         ax = axes[i]
         ax.imshow(intersection_data.render(), cmap="viridis", interpolation='nearest')
-        ax.set_title(f"I: {', '.join(map(lambda x: str(roads_dict[intersection_id, x].name), road_graph.adj[intersection_id].keys()))} ({intersection_id})",
-                     fontsize=10)
+        ax.set_title(f"{','.join(map(lambda x: str(roads_dict[intersection_id, x].name), road_graph.adj[intersection_id].keys()))}({intersection_id})",
+                     fontsize=11)
         ax.axis('off')
 
     for j in range(i + 1, len(axes)):
@@ -99,9 +94,6 @@ def intersections_portrayal(model):
 def roads_portrayal(model):
     update_counter.get()
     roads_dict = model.grid.roads
-    if not roads_dict:
-        solara.Markdown("No intersections available.")
-        return
 
     num_roads = len(roads_dict)
     cols = 1
@@ -128,8 +120,8 @@ def roads_portrayal(model):
 
         ax = axes[i]
         ax.imshow(road_data.render(), cmap="viridis", interpolation='nearest')
-        ax.set_title(f"R: {road_data.name}, {float(road_data.length):.1f}m ({road_start_id} -> {road_end_id})",
-                     fontsize=10)
+        ax.set_title(f"{road_data.name}, {float(road_data.length):.1f}m ({road_start_id} -> {road_end_id})",
+                     fontsize=11)
         ax.axis('off')
 
 
