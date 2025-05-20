@@ -80,7 +80,7 @@ def intersections_portrayal(model):
 
         ax = axes[i]
         ax.imshow(intersection_data.render(), cmap="viridis", interpolation='nearest')
-        ax.set_title(f"{','.join(map(lambda x: str(roads_dict[intersection_id, x].name), road_graph.adj[intersection_id].keys()))}({intersection_id})",
+        ax.set_title(f"{','.join(map(lambda x: str(roads_dict[intersection_id, x].name), road_graph.adj[intersection_id].keys()))}\n({intersection_id})",
                      fontsize=11)
         ax.axis('off')
 
@@ -155,7 +155,7 @@ def page():
         name="Autonomous Intersection Model",
     )
 
-    plt.close('all')
+    # plt.close('all')
 
 routes = [
     solara.Route(path="/", component=page, label="Agent Model"),

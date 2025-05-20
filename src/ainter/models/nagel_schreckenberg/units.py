@@ -27,6 +27,8 @@ DEFAULT_ROAD_MAX_SPEED: Final[PhysicalSpeed] = SPEED_MAX
 ACCELERATION_MAX: Final[PhysicalAcceleration] = np.float64(2.5)
 ACCELERATION_MIN: Final[PhysicalAcceleration] = np.float64(-1.5)
 
+ROAD_COLOR: Final[np.uint8] = np.uint8(64)
+
 
 def discretize_time(time_obj: time) -> DiscreteTime:
     return np.uint32(np.round((time_obj.hour * 3600 + time_obj.minute * 60 + time_obj.second) / DELTA_TIME))
@@ -54,13 +56,26 @@ class TimeDensity(ABC):
 class NormalTimeDensity(TimeDensity):
 
     def __call__(self, t: DiscreteTime) -> float:
-        raise NotImplemented
+        peak1_mu_seconds: float = 8 * 3600  # 8:00
+        peak2_mu_seconds: float = 16 * 3600 # 16:00
+
+        sigma_seconds: float = 1.5 * 3600
+        amplitude: float = 0.3
+
+        def gaussian_component(current_time: float, peak_mu: float, sigma: float, A: float) -> float:
+            return A * np.exp(-np.square(current_time - peak_mu) / (2 * np.square(sigma)))
+
+        time_float = float(t)
+        prob_peak1 = gaussian_component(time_float, peak1_mu_seconds, sigma_seconds, amplitude)
+        prob_peak2 = gaussian_component(time_float, peak2_mu_seconds, sigma_seconds, amplitude)
+
+        return prob_peak1 + prob_peak2
 
 
 class UniformTimeDensity(TimeDensity):
 
     def __call__(self, t: DiscreteTime) -> float:
-        return 0.1
+        return 0.2
 
 
 def get_time_density_strategy(code: str) -> TimeDensity:
