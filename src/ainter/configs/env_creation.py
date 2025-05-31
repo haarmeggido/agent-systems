@@ -1,3 +1,4 @@
+import json
 from dataclasses import dataclass
 from typing import Any, Self
 from datetime import time
@@ -73,3 +74,9 @@ class EnvConfig:
         return cls(physics=PhysicsConfig.from_json(json_data['physics']),
                    map_box=MapBoxConfig.from_json(json_data['map_box']),
                    vehicles=VehiclesConfig.from_json(json_data['vehicles']))
+
+def get_env_config_from_json(input_file) -> EnvConfig:
+    data = json.load(input_file, object_hook=EnvConfig.from_json)
+    assert isinstance(data, EnvConfig), 'Invalid data structure provided'
+
+    return data
