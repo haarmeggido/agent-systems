@@ -5,8 +5,6 @@ import osmnx as ox
 import uvicorn
 from starlette.applications import Starlette
 from starlette.routing import Mount
-import random
-import numpy as np
 
 from ainter.configs.env_creation import get_env_config_from_json
 from ainter.io.cmd.command import CMDCommand

@@ -21,7 +21,7 @@ def set_environment_config(env_config: EnvConfig) -> None:
     shared_env_config = {
         "seed": {
             "type": "InputText",
-            "value": 42,
+            "value": 69,
             "label": "Random Seed",
         },
         "env_config": env_config,
@@ -60,7 +60,7 @@ def network_portrayal(model):
     solara.FigureMatplotlib(fig)
 
 @solara.component
-def intersections_portrayal(model):
+def intersections_portrayal(model) -> None:
     update_counter.get()
 
     intersections_dict = model.grid.intersections
@@ -91,7 +91,7 @@ def intersections_portrayal(model):
     solara.FigureMatplotlib(fig)
 
 @solara.component
-def roads_portrayal(model):
+def roads_portrayal(model) -> None:
     update_counter.get()
     roads_dict = model.grid.roads
 
@@ -138,9 +138,9 @@ def roads_portrayal(model):
     solara.FigureMatplotlib(fig)
 
 @solara.component
-def page():
+def page() -> None:
     if shared_env_config is None:
-        raise ValueError("Environment config not set. Please call set_environment_config() first.")
+        raise ValueError("Environment config not set. Please call `set_environment_config(...)` first.")
 
     model = NaSchUrbanModel(shared_env_config["env_config"])
 

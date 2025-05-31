@@ -137,6 +137,10 @@ class Vehicle(Agent):
             road.move_agent(agent_id=self.unique_id,
                             speed=self.speed)
 
+    def finished(self) -> bool:
+        """Check if the agent has reached its destination"""
+        return self.pos == self.to_node
+
     def decide_speed(self, road) -> DiscreteSpeed:
         # TODO: Make function to convert from km/h to m/s
         distance_to_obstacle = road.get_length_to_obstacle(agent_id=self.unique_id)

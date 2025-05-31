@@ -1,4 +1,4 @@
-from random import random, choice, choices
+from random import choice, choices
 
 from mesa import Model, Agent
 from networkx import descendants
@@ -24,18 +24,20 @@ class NaSchUrbanModel(Model):
         self.agent_spawn_probability: TimeDensity = env_config.vehicles.time_density_strategy
 
         self.running = True
-
         # self.spawn_agent()
 
     def step(self) -> None:
         print(self.time)
         if self.random.random() < self.agent_spawn_probability(self.time):
             self.spawn_agent()
+
         # TODO: remove except
         try:
             self.agents.sort(lambda x: x.unique_id).do("step")
+            self.agents.sort(lambda x: x.unique_id).select(lambda x : x.finished()).do("remove")
         except:
             pass
+
         self.time += 1
         if self.time > self.end_time:
             self.running = False
@@ -59,6 +61,3 @@ class NaSchUrbanModel(Model):
         return Vehicle(model=self,
                        type=vehicle_type,
                        path=path)
-
-    def remove_agent(self) -> None:
-        pass
