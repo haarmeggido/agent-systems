@@ -46,7 +46,7 @@ class NaSchUrbanModel(Model):
             end_node_possibilities = list(descendants(graph, start_node))
             if len(end_node_possibilities) == 0:
                 continue
-
+                
             end_node = self.random.choice(end_node_possibilities)
             path = bfs_shortest_path(graph, start_node, end_node)
             if len(path) >= self.min_node_path_length:
