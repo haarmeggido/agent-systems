@@ -35,7 +35,7 @@ class VisualizeCommand(CMDCommand):
         ]
 
         app = Starlette(routes=routes)
-        uvicorn.run(app, host=args.host, port=args.port)
+        uvicorn.run(app, host=args.host, port=args.port, lifespan="on")
 
     def configure_parser(self, subparser) -> ArgumentParser:
         parser: ArgumentParser = subparser.add_parser(name='visualize',
