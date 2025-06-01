@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from enum import auto, IntEnum
-from random import randint
 from typing import Optional
 
 import numpy as np
@@ -32,7 +31,7 @@ class VehicleType(IntEnum):
         """Method that returns VehiclePhysicalConfiguration associated with a VehicleType.
         :returns: VehiclePhysicalConfiguration object associated with a given VehicleType.
         """
-        # TODO: FIx so that the acc is zero when CELL_SIZE=2m AND DELTA_TIME=1s
+        # TODO: Fix so that the acc is zero when CELL_SIZE=2m AND DELTA_TIME=1s
         match self:
             case VehicleType.CAR:
                 return VehicleCharacteristic(length=discretize_length(4.5),
@@ -89,9 +88,7 @@ class Vehicle(Agent):
         self.to_node = self.path[-1]
         self.pos = None                 # type: Optional[int | tuple[int, int]]
         self.inner_position = None
-        # TODO use a proper self.rng
-        # TODO: generate dark vehicles
-        self.color = np.random.randint(128, 182, size=3, dtype=np.uint8)
+        self.color = np.array([model.random.randint(128, 181) for _ in range(3)], dtype=np.uint8) # roundabaut way to stick to mesa's random
 
         print("Vehicle", self.unique_id, "added", self.from_node)
         self.pos = self.from_node
@@ -116,7 +113,7 @@ class Vehicle(Agent):
                 road = self.model.grid.roads[self.pos]
                 road.add_agent(agent_id=self.unique_id,
                                color=self.color,
-                               lane=randint(0, road.lanes - 1),
+                               lane=self.model.random.randint(0, road.lanes - 1),
                                length=self.type.get_characteristic().length)
 
         elif self.is_on_road():  # Immediately teleport agent to the next road segment
