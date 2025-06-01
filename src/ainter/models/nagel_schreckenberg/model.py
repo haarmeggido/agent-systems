@@ -1,5 +1,3 @@
-from random import choice, choices
-
 from mesa import Model, Agent
 from networkx import descendants
 
@@ -44,18 +42,18 @@ class NaSchUrbanModel(Model):
         graph = self.grid.road_graph
 
         while True:
-            start_node = choice(list(graph.nodes))
+            start_node = self.random.choice(list(graph.nodes))
             end_node_possibilities = list(descendants(graph, start_node))
             if len(end_node_possibilities) > 0:
                 continue
-
+                
             end_node = choice(end_node_possibilities)
             path = bfs_shortest_path(graph, start_node, end_node)
             if len(path) >= self.min_node_path_length:
                 break
 
         # Randomly select a vehicle type
-        vehicle_type, = choices(types, weights=list(map(lambda x: x.get_pdf(), types)), k=1)
+        vehicle_type = self.random.choices(types, weights=[x.get_pdf() for x in types], k=1)[0]
         return Vehicle(model=self,
                        type=vehicle_type,
                        path=path)
