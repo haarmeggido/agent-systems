@@ -31,7 +31,7 @@ class VehicleType(IntEnum):
         """Method that returns VehiclePhysicalConfiguration associated with a VehicleType.
         :returns: VehiclePhysicalConfiguration object associated with a given VehicleType.
         """
-        # TODO: FIx so that the acc is zero when CELL_SIZE=2m AND DELTA_TIME=1s
+        # TODO: Fix so that the acc is zero when CELL_SIZE=2m AND DELTA_TIME=1s
         match self:
             case VehicleType.CAR:
                 return VehicleCharacteristic(length=discretize_length(4.5),
