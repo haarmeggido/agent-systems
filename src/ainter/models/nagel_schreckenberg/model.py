@@ -21,20 +21,17 @@ class NaSchUrbanModel(Model):
 
         self.agent_spawn_probability: TimeDensity = env_config.vehicles.time_density_strategy
 
+        self.min_node_path_length = env_config.vehicles.min_node_path_length
+
         self.running = True
-        # self.spawn_agent()
 
     def step(self) -> None:
         print(self.time)
         if self.random.random() < self.agent_spawn_probability(self.time):
-            self.spawn_agent()
+            _ = self.spawn_agent()
 
-        # TODO: remove except
-        try:
-            self.agents.sort(lambda x: x.unique_id).do("step")
-            self.agents.sort(lambda x: x.unique_id).select(lambda x : x.finished()).do("remove")
-        except:
-            pass
+        self.agents.sort(lambda x: x.unique_id).do("step")
+        self.agents.sort(lambda x: x.unique_id).select(lambda x: x.finished()).do("remove")
 
         self.time += 1
         if self.time > self.end_time:
@@ -48,11 +45,12 @@ class NaSchUrbanModel(Model):
             start_node = self.random.choice(list(graph.nodes))
             end_node_possibilities = list(descendants(graph, start_node))
             if len(end_node_possibilities) > 0:
+                continue
+                
+            end_node = choice(end_node_possibilities)
+            path = bfs_shortest_path(graph, start_node, end_node)
+            if len(path) >= self.min_node_path_length:
                 break
-
-        end_node = self.random.choice(end_node_possibilities)
-
-        path = bfs_shortest_path(graph, start_node, end_node)
 
         # Randomly select a vehicle type
         vehicle_type = self.random.choices(types, weights=[x.get_pdf() for x in types], k=1)[0]

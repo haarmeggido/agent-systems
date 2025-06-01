@@ -45,10 +45,11 @@ class MapBoxConfig:
 class VehiclesConfig:
     max_count: int
     time_density_strategy: TimeDensity
+    min_node_path_length: int
 
     @classmethod
     def from_json(cls, json_data: dict[str, Any]) -> Self | dict[str, Any]:
-        if not ('max_count' in json_data and 'time_density_strategy' in json_data):
+        if not ('max_count' in json_data and 'time_density_strategy' in json_data and 'min_node_path_length' in json_data):
             return json_data
 
         max_count = json_data['max_count']
@@ -56,8 +57,13 @@ class VehiclesConfig:
         if max_count < 1:
             raise ValueError(f"{max_count=} cannot be zero-like or negative")
 
+        min_node_path_length = json_data['min_node_path_length']
+        if min_node_path_length < 1:
+            raise ValueError(f"{min_node_path_length=} cannot be zero-like or negative")
+
         return cls(max_count=max_count,
-                   time_density_strategy=get_time_density_strategy(json_data['time_density_strategy']))
+                   time_density_strategy=get_time_density_strategy(json_data['time_density_strategy']),
+                   min_node_path_length=min_node_path_length)
 
 
 @dataclass(slots=True, frozen=True)

@@ -29,6 +29,8 @@ ACCELERATION_MIN: Final[PhysicalAcceleration] = np.float64(-1.5)
 
 ROAD_COLOR: Final[np.uint8] = np.uint8(64)
 
+MIN_JUMP_PATH_NODES_LENGTH: Final = 4
+
 
 def discretize_time(time_obj: time) -> DiscreteTime:
     return np.uint32(np.round((time_obj.hour * 3600 + time_obj.minute * 60 + time_obj.second) / DELTA_TIME))
@@ -44,6 +46,10 @@ def discretize_speed(speed: PhysicalSpeed) -> DiscreteSpeed:
 def discretize_acceleration(acceleration: PhysicalAcceleration) -> DiscreteAcceleration:
     """Converts the physical length measure into discrete Length value"""
     return np.int8(np.round(acceleration * DELTA_TIME * DELTA_TIME / CELL_SIZE))
+
+def convert_km_h_to_m_s(speed_kmh: float) -> PhysicalSpeed:
+    """Converts speed from km/h to m/s"""
+    return np.float64(speed_kmh * 1000 / 3600)
 
 
 class TimeDensity(ABC):
