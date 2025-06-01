@@ -41,7 +41,8 @@ class Environment:
 
     @classmethod
     def from_directed_graph(cls, graph: MultiDiGraph) -> Self:
-        # TODO: Assert that a MultiDiGraph can be converted to DiGraph without loosing generality
+        assert all(map(lambda x: x[2] == 0, graph.edges)), 'The convertion to DiGraph would result in information loss'
+
         graph_di = DiGraph(graph)
 
         roads = create_roads_from_graph(graph, graph_di)

@@ -1,7 +1,6 @@
 import contextlib
 from dataclasses import dataclass
 from enum import auto, IntEnum
-from typing import Optional
 
 import numpy as np
 from mesa import Agent, Model
@@ -10,8 +9,15 @@ from ainter.models.nagel_schreckenberg.units import discretize_length, discretiz
     DiscreteLength, DiscreteAcceleration, DiscreteSpeed
 
 type VehicleId = int
-type RoadPosition = tuple[int, slice]
-type IntersectionPosition = tuple[slice, slice]
+type IntersectionPosition = int
+type RoadPosition = tuple[int, int]
+type Position = IntersectionPosition | RoadPosition
+
+def is_intersection_position(pos: Position) -> bool:
+    return isinstance(pos, int)
+
+def is_road_position(pos: Position) -> bool:
+    return isinstance(pos, tuple)
 
 
 @dataclass(slots=True, frozen=True)
@@ -77,57 +83,51 @@ class VehicleType(IntEnum):
 class Vehicle(Agent):
 
     def __init__(self, model: Model,
-                 type: VehicleType,
-                 path: list[int],
-                 ) -> None:
-        super().__init__(model=model)
+                 vehicle_type: VehicleType,
+                 path: list[int]) -> None:
+        assert len(path) > 1, "Cannot construct a valid graph path from one node"
 
-        self.type = type
+        super().__init__(model=model)
+        self.type = vehicle_type
         self.speed = discretize_speed(0.)
         self.path = path
         self.from_node = self.path[0]
         self.to_node = self.path[-1]
-        self.pos = None                 # type: Optional[int | tuple[int, int]]
-        self.inner_position = None
-        self.color = np.array([model.random.randint(128, 181) for _ in range(3)], dtype=np.uint8) # roundabaut way to stick to mesa's random
-
-        print("Vehicle", self.unique_id, "added", self.from_node)
         self.pos = self.from_node
-        self.model.grid.intersections[self.pos].add_agent(agent_id=self.unique_id)
+        self.inner_position = None
+        self.color = np.array([self.random.randint(128, 181) for _ in range(3)], dtype=np.uint8)
+        self.model.add_agent_to_environment(node_id=self.pos, agent_id=self.unique_id)
 
 
     def step(self) -> None:
-        if self.is_on_intersection():
-            intersection = self.model.grid.intersections[self.pos]
-
-            if intersection.is_agent_leaving(agent_id=self.unique_id,
-                                             speed=self.speed):
-                print(self.unique_id, "Leaving intersection", self.pos)
+        if self.model.is_agent_leaving(position=self.pos,
+                                       agent_id=self.unique_id,
+                                       speed=self.speed):
+            self.model.remove_agent_from_environment(position=self.pos,
+                                                     agent_id=self.unique_id)
+            if self.is_on_intersection():
                 current_journey_index = self.path.index(self.pos)
                 self.pos = (self.path[current_journey_index], self.path[current_journey_index + 1])
-                road = self.model.grid.roads[self.pos]
-                road.add_agent(agent_id=self.unique_id,
-                               color=self.color,
-                               lane=self.model.random.randint(0, road.lanes - 1),
-                               length=self.type.get_characteristic().length)
+                self.model.add_agent_to_environment(position=self.pos,
+                                                    agent_id=self.unique_id,
+                                                    color=self.color,
+                                                    length=self.type.get_characteristic().length)
 
-        elif self.is_on_road():  # Immediately teleport agent to the next road segment
-            road = self.model.grid.roads[self.pos]
-
-            if road.is_agent_leaving(agent_id=self.unique_id,
-                                     speed=self.speed):
-                print(self.unique_id, "Leaving road", self.pos)
+            elif self.is_on_road():
                 current_journey_index = self.path.index(self.pos[1])
                 self.pos = self.path[current_journey_index]
-                intersection = self.model.grid.intersections[self.pos]
-                intersection.add_agent(agent_id=self.unique_id)
+                self.model.add_agent_to_environment(node_id=self.pos,
+                                                    agent_id=self.unique_id)
 
-            # Agents Obey the speed limit of the road
-            # TODO: Check if an agent would collide
-            self.speed = self.decide_speed(road)
-            print("Agent", self.unique_id, "speed", self.speed)
-            road.move_agent(agent_id=self.unique_id,
-                            speed=self.speed)
+            else:
+                raise ValueError("The position of an agent cannot be determined")
+
+        distance = self.model.get_obsticle_dictance(position=self.pos,
+                                                    agent_id=self.unique_id)
+        self.speed = self.decide_speed(distance)
+        self.model.move_agent(position=self.pos,
+                              agent_id=self.unique_id,
+                              speed=self.speed)
 
     def finished(self) -> bool:
         """Check if the agent has reached its destination"""
@@ -145,20 +145,11 @@ class Vehicle(Agent):
 
             self.model.deregister_agent(self)
 
-    def decide_speed(self, road) -> DiscreteSpeed:
-        # TODO: Make function to convert from km/h to m/s
-        distance_to_obstacle = road.get_length_to_obstacle(agent_id=self.unique_id)
-
-        if distance_to_obstacle < self.get_breaking_distance():
-            return max(self.speed + self.type.get_characteristic().acc_backward, 2)
-
-        return min(self.speed + self.type.get_characteristic().acc_forward, discretize_speed(road.max_speed / 3.6))
-
-    def get_breaking_distance(self) -> DiscreteLength:
-        return self.speed ** 2 / (2 * self.type.get_characteristic().acc_backward)
+    def decide_speed(self, distance: DiscreteLength) -> DiscreteSpeed:
+        return self.speed
 
     def is_on_intersection(self) -> bool:
-        return isinstance(self.pos, int)
+        return is_intersection_position(self.pos)
 
     def is_on_road(self) -> bool:
-        return isinstance(self.pos, tuple)
+        return is_road_position(self.pos)

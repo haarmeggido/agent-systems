@@ -101,3 +101,7 @@ class Road:
 
     def render(self) -> np.ndarray:
         return self.render_lut[self.grid.T]
+
+    def contains_agent(self, agent_id) -> bool:
+        return np.any(self.grid == agent_id)
+
