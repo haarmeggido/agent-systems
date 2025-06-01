@@ -2,7 +2,7 @@ python-implementation = "CPython"
 
 [project]
 name = "agent-systems"
-version = "0.0.0.1"
+version = "0.0.1.0"
 requires-python = ">=3.12.9"
 authors = [
     { name="Miłosz Górlaczyk", email="goralczyk.milosz2k@gmail.com" },   
