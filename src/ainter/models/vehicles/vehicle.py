@@ -96,7 +96,7 @@ class Vehicle(Agent):
         self.pos = self.from_node
         self.inner_position = None
         self.color = np.array([self.random.randint(128, 181) for _ in range(3)], dtype=np.uint8)
-        self.model.add_agent_to_environment(node_id=self.pos, agent_id=self.unique_id)
+        self.model.add_agent_to_environment(position=self.pos, agent_id=self.unique_id)
 
 
     def step(self) -> None:
@@ -135,13 +135,8 @@ class Vehicle(Agent):
 
     def remove(self) -> None:
         with contextlib.suppress(KeyError):
-            if self.is_on_road():
-                road = self.model.grid.roads[self.pos]
-                road.remove_agent(agent_id=self.unique_id)
-
-            elif self.is_on_intersection():
-                intersection = self.model.grid.intersections[self.pos]
-                intersection.remove_agent(agent_id=self.unique_id)
+            self.model.remove_agent_from_environment(position=self.pos,
+                                                     agent_id=self.unique_id)
 
             self.model.deregister_agent(self)
 
