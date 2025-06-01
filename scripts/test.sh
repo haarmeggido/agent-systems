@@ -4,6 +4,8 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-pytest -n 0 .
+coverage run --parallel-mode --source ./src/ainter -m pytest -n auto .
+coverage combine
+coverage report
 
 exit 0

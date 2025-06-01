@@ -35,6 +35,7 @@ dependencies = {file = ["requirements.txt"]}
 addopts = [
     "--cov=ainter",
     "--cov-report=term-missing",
+    "--cov-report=xml",
     "--import-mode=importlib",
     "-ra",
     "-q",

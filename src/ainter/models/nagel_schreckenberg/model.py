@@ -172,7 +172,7 @@ class DummyModel(Model, VehicleModel):
         pass
 
     def is_agent_leaving(self, position: Position, agent_id: VehicleId, speed: DiscreteSpeed) -> bool:
-        return True
+        pass
 
     def move_agent(self, position: Position, agent_id: VehicleId, speed: DiscreteSpeed) -> None:
         pass

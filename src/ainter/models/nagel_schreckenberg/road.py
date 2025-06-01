@@ -97,7 +97,7 @@ class Road:
         return road_length - agent_start
 
     def is_agent_leaving(self, agent_id: VehicleId, speed: DiscreteSpeed) -> bool:
-        return (self.grid[-(speed + 1):, :] == agent_id).any()
+        return np.any(self.grid[-(speed + 1):, :] == agent_id)
 
     def render(self) -> np.ndarray:
         return self.render_lut[self.grid.T]
