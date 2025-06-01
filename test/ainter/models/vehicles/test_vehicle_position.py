@@ -35,6 +35,11 @@ def test_is_road_position(position: Position, expected: bool):
     [1, 2],
     {"u": 1, "v": 2},
     None,
+    (0.5,),
+    (0.5, 0.5),
+    (0.5, 1),
+    (1, 0.5),
+    ("ABC", 1),
 ])
 def test_position_functions_with_invalid_types(invalid_position: Any):
     assert not is_intersection_position(invalid_position), f"is_intersection_position should return False for {type(invalid_position)}"

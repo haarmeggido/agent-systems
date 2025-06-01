@@ -4,6 +4,6 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-pytest .
+pytest -n 0 .
 
 exit 0

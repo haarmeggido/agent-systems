@@ -17,7 +17,7 @@ def is_intersection_position(pos: Position) -> bool:
     return isinstance(pos, int)
 
 def is_road_position(pos: Position) -> bool:
-    return isinstance(pos, tuple)
+    return isinstance(pos, tuple) and len(pos) == 2 and isinstance(pos[0], int) and isinstance(pos[1], int)
 
 
 @dataclass(slots=True, frozen=True)
@@ -35,8 +35,8 @@ class VehicleType(IntEnum):
     MOTORCYCLE = auto()
 
     def get_characteristic(self) -> VehicleCharacteristic:
-        """Method that returns VehiclePhysicalConfiguration associated with a VehicleType.
-        :returns: VehiclePhysicalConfiguration object associated with a given VehicleType.
+        """Method that returns VehicleCharacteristic associated with a VehicleType.
+        :returns: VehicleCharacteristic object associated with a given VehicleType.
         """
         # TODO: Fix so that the acc is zero when CELL_SIZE=2m AND DELTA_TIME=1s
         match self:
@@ -94,12 +94,14 @@ class Vehicle(Agent):
         self.from_node = self.path[0]
         self.to_node = self.path[-1]
         self.pos = self.from_node
-        self.inner_position = None
         self.color = np.array([self.random.randint(128, 181) for _ in range(3)], dtype=np.uint8)
         self.model.add_agent_to_environment(position=self.pos, agent_id=self.unique_id)
 
 
     def step(self) -> None:
+        if self.finished():
+            raise ValueError("Agent should be removed")
+
         if self.model.is_agent_leaving(position=self.pos,
                                        agent_id=self.unique_id,
                                        speed=self.speed):
@@ -116,13 +118,13 @@ class Vehicle(Agent):
             elif self.is_on_road():
                 current_journey_index = self.path.index(self.pos[1])
                 self.pos = self.path[current_journey_index]
-                self.model.add_agent_to_environment(node_id=self.pos,
+                self.model.add_agent_to_environment(position=self.pos,
                                                     agent_id=self.unique_id)
 
             else:
                 raise ValueError("The position of an agent cannot be determined")
 
-        distance = self.model.get_obsticle_dictance(position=self.pos,
+        distance = self.model.get_obstacle_distance(position=self.pos,
                                                     agent_id=self.unique_id)
         self.speed = self.decide_speed(distance)
         self.model.move_agent(position=self.pos,
