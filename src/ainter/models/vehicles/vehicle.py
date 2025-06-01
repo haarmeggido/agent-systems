@@ -1,3 +1,4 @@
+import contextlib
 from dataclasses import dataclass
 from enum import auto, IntEnum
 from random import randint
@@ -106,12 +107,6 @@ class Vehicle(Agent):
                                              speed=self.speed):
                 print(self.unique_id, "Leaving intersection", self.pos)
                 current_journey_index = self.path.index(self.pos)
-                if current_journey_index == len(self.path) - 1:
-                    print(self.unique_id, "Arrived at destination", self.to_node)
-                    self.model.grid.intersections[self.pos].remove_agent(agent_id=self.unique_id)
-                    self.remove()
-                    return
-
                 self.pos = (self.path[current_journey_index], self.path[current_journey_index + 1])
                 road = self.model.grid.roads[self.pos]
                 road.add_agent(agent_id=self.unique_id,
@@ -140,6 +135,18 @@ class Vehicle(Agent):
     def finished(self) -> bool:
         """Check if the agent has reached its destination"""
         return self.pos == self.to_node
+
+    def remove(self) -> None:
+        with contextlib.suppress(KeyError):
+            if self.is_on_road():
+                road = self.model.grid.roads[self.pos]
+                road.remove_agent(agent_id=self.unique_id)
+
+            elif self.is_on_intersection():
+                intersection = self.model.grid.intersections[self.pos]
+                intersection.remove_agent(agent_id=self.unique_id)
+
+            self.model.deregister_agent(self)
 
     def decide_speed(self, road) -> DiscreteSpeed:
         # TODO: Make function to convert from km/h to m/s

@@ -5,7 +5,7 @@ import numpy as np
 from shapely import LineString
 
 from ainter.models.nagel_schreckenberg.units import discretize_length, PhysicalLength, DEFAULT_ROAD_MAX_SPEED, \
-    PhysicalSpeed, DiscreteSpeed, DiscreteLength, ROAD_COLOR
+    PhysicalSpeed, DiscreteSpeed, DiscreteLength, ROAD_COLOR, convert_km_h_to_m_s
 from ainter.models.vehicles.vehicle import VehicleId
 
 
@@ -35,7 +35,7 @@ class Road:
         lanes = int(edge_info.get('lanes', '1'))
         length = edge_info['length']
         cells_num = discretize_length(length.astype(np.float32))
-        max_speed = float(edge_info.get('max_speed', DEFAULT_ROAD_MAX_SPEED))
+        max_speed = convert_km_h_to_m_s(float(edge_info.get('max_speed', DEFAULT_ROAD_MAX_SPEED)))
         name = edge_info.get('name', None)
         name = name if name != '' else None
         is_oneway = edge_info['oneway']
