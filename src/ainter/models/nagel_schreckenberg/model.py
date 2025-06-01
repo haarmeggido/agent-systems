@@ -44,7 +44,7 @@ class NaSchUrbanModel(Model):
         while True:
             start_node = self.random.choice(list(graph.nodes))
             end_node_possibilities = list(descendants(graph, start_node))
-            if len(end_node_possibilities) > 0:
+            if len(end_node_possibilities) == 0:
                 continue
                 
             end_node = self.random.choice(end_node_possibilities)

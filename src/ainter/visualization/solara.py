@@ -142,7 +142,7 @@ def page() -> None:
     if shared_env_config is None:
         raise ValueError("Environment config not set. Please call `set_environment_config(...)` first.")
 
-    model = NaSchUrbanModel(shared_env_config["env_config"])
+    model = NaSchUrbanModel(shared_env_config["env_config"], seed=shared_env_config["seed"]["value"])
 
     SolaraViz(
         model,
