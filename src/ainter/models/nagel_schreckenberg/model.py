@@ -50,7 +50,8 @@ class NaSchUrbanModel(Model, VehicleModel):
         self.graph = get_data_from_bbox(env_config.map_box)
         self.grid = Environment.from_directed_graph(self.graph)
 
-        self.time = discretize_time(env_config.physics.start_time)
+        self.start_time = discretize_time(env_config.physics.start_time)
+        self.time = self.start_time
         self.end_time = discretize_time(env_config.physics.end_time)
 
         self.agent_spawn_probability: TimeDensity = env_config.vehicles.time_density_strategy
@@ -60,7 +61,7 @@ class NaSchUrbanModel(Model, VehicleModel):
         self.running = True
 
     def step(self) -> None:
-        print(self.time)
+        print(self.time - self.start_time)
         if self.random.random() < self.agent_spawn_probability(self.time):
             _ = self.spawn_agent()
 
