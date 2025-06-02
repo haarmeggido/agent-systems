@@ -10,7 +10,6 @@
     "top": 50.069047
   },
   "vehicles": {
-    "max_count": 500,
     "time_density_strategy": "uniform_dist",
     "min_node_path_length": 3
   }

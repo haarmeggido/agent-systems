@@ -26,10 +26,13 @@ DEFAULT_ROAD_MAX_SPEED: Final[PhysicalSpeed] = SPEED_MAX
 
 ACCELERATION_MAX: Final[PhysicalAcceleration] = np.float64(2.5)
 ACCELERATION_MIN: Final[PhysicalAcceleration] = np.float64(-1.5)
+BREAKING_DISTANCE_MATRIX = np.array([
+# S= 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+    [0, 1, 3, 6, 10, 15, 21, 28, 36, 45, 55,], # ACC = 1
+    [0, 1, 2, 4, 6, 9, 12, 16, 20, 25, 30,], # ACC = 2
+], dtype=np.uint16)
 
 ROAD_COLOR: Final[np.uint8] = np.uint8(64)
-
-MIN_JUMP_PATH_NODES_LENGTH: Final = 4
 
 
 def discretize_time(time_obj: time) -> DiscreteTime:
@@ -50,6 +53,14 @@ def discretize_acceleration(acceleration: PhysicalAcceleration) -> DiscreteAccel
 def convert_km_h_to_m_s(speed_kmh: float) -> PhysicalSpeed:
     """Converts speed from km/h to m/s"""
     return np.float64(speed_kmh * 1000 / 3600)
+
+def get_breaking_distance(speed: DiscreteSpeed, backward_acceleration: DiscreteAcceleration) -> DiscreteLength:
+    assert speed >= 0., "Speed cannot be negative"
+    assert 0. < backward_acceleration < 3, "Acceleration must be reasonable"
+
+    global BREAKING_DISTANCE_MATRIX
+
+    return BREAKING_DISTANCE_MATRIX[backward_acceleration - 1, speed]
 
 
 class TimeDensity(ABC):
@@ -80,8 +91,14 @@ class NormalTimeDensity(TimeDensity):
 
 class UniformTimeDensity(TimeDensity):
 
+    def __init__(self, p: float) -> None:
+        if not (0. <= p <= 1.):
+            raise ValueError(f"{p=} is not a valid probability value")
+
+        self.p = p
+
     def __call__(self, t: DiscreteTime) -> float:
-        return 0.2
+        return self.p
 
 
 def get_time_density_strategy(code: str) -> TimeDensity:
@@ -90,7 +107,9 @@ def get_time_density_strategy(code: str) -> TimeDensity:
             return NormalTimeDensity()
 
         case "uniform_dist":
-            return UniformTimeDensity()
+            return UniformTimeDensity(0.2)
 
-        case _:
-            raise ValueError("Unknown strategy code provided")
+        case "null_dist":
+            return UniformTimeDensity(0.)
+
+    raise ValueError("Unknown strategy code provided")

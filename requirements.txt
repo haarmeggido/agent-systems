@@ -1,5 +1,6 @@
 mesa==3.1.5
 pytest==8.3.5
+pytest-xdist==3.7.0
 pytest-cov==6.0.0
 numpy==2.2.4
 networkx[default]==3.4.2

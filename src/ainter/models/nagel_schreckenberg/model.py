@@ -1,6 +1,6 @@
-from typing import Optional
+import itertools
+from abc import abstractmethod, ABC
 
-import numpy as np
 from mesa import Model, Agent
 from networkx import descendants
 
@@ -15,7 +15,34 @@ from ainter.models.vehicles.vehicle import Vehicle, VehicleType, VehicleId, Posi
     is_road_position
 
 
-class NaSchUrbanModel(Model):
+class VehicleModel(ABC):
+
+    @abstractmethod
+    def spawn_agent(self) -> Agent:
+        pass
+
+    @abstractmethod
+    def add_agent_to_environment(self, position: Position, agent_id: VehicleId, **kwargs) -> Intersection | Road:
+        pass
+
+    @abstractmethod
+    def remove_agent_from_environment(self, position: Position, agent_id: VehicleId) -> None:
+        pass
+
+    @abstractmethod
+    def is_agent_leaving(self, position: Position, agent_id: VehicleId, speed: DiscreteSpeed) -> bool:
+        pass
+
+    @abstractmethod
+    def move_agent(self, position: Position, agent_id: VehicleId, speed: DiscreteSpeed) -> None:
+        pass
+
+    @abstractmethod
+    def get_obstacle_distance(self, position: Position, agent_id: VehicleId) -> DiscreteLength:
+        pass
+
+
+class NaSchUrbanModel(Model, VehicleModel):
 
     def __init__(self, env_config: EnvConfig, seed=None) -> None:
         super().__init__(seed=seed)
@@ -47,20 +74,27 @@ class NaSchUrbanModel(Model):
     def spawn_agent(self) -> Agent:
         types = list(VehicleType)
         graph = self.grid.road_graph
+        vehicle_type: VehicleType = self.random.choices(types, weights=[x.get_pdf() for x in types], k=1)[0]
+        vehicle_minimum_road_length = vehicle_type.get_characteristic().length + discretize_length(2.)
 
         while True:
             start_node = self.random.choice(list(graph.nodes))
             end_node_possibilities = list(descendants(graph, start_node))
             if len(end_node_possibilities) == 0:
                 continue
-                
+
             end_node = self.random.choice(end_node_possibilities)
             path = bfs_shortest_path(graph, start_node, end_node)
-            if len(path) >= self.min_node_path_length:
-                break
+            if len(path) < self.min_node_path_length:
+                continue
 
-        # Randomly select a vehicle type
-        vehicle_type = self.random.choices(types, weights=[x.get_pdf() for x in types], k=1)[0]
+            if any(map(lambda x: discretize_length(self.grid.roads[x].length) < vehicle_minimum_road_length,
+                       itertools.pairwise(path))):
+                continue
+
+            break
+
+
         return Vehicle(model=self,
                        vehicle_type=vehicle_type,
                        path=path)
@@ -84,7 +118,20 @@ class NaSchUrbanModel(Model):
         raise ValueError("Position cannot be decoded")
 
     def remove_agent_from_environment(self, position: Position, agent_id: VehicleId) -> None:
-        pass
+        if is_intersection_position(position):
+            assert position in self.grid.intersections, "Cannot add agent nonexistent intersection"
+            intersection = self.grid.intersections[position]
+            assert intersection.contains_agent(agent_id=agent_id), "Agent is not on this intersection"
+            intersection.remove_agent(agent_id=agent_id)
+
+        elif is_road_position(position):
+            assert position in self.grid.roads, "Cannot add agent to nonexistent road"
+            road = self.grid.roads[position]
+            assert road.contains_agent(agent_id=agent_id), "Agent is not on this road"
+            road.remove_agent(agent_id=agent_id)
+
+        else:
+            raise ValueError("Position cannot be decoded")
 
     def is_agent_leaving(self, position: Position, agent_id: VehicleId, speed: DiscreteSpeed) -> bool:
         if is_intersection_position(position):
@@ -102,36 +149,48 @@ class NaSchUrbanModel(Model):
         raise ValueError("Position cannot be decoded")
 
     def move_agent(self, position: Position, agent_id: VehicleId, speed: DiscreteSpeed) -> None:
-        # Agents Obey the speed limit of the road
-        # TODO: Check if an agent would collide
-        #self.speed = self.decide_speed(road)
-        #print("Agent", self.unique_id, "speed", self.speed)
-        #road.move_agent(agent_id=self.unique_id,
-        #                speed=self.speed)
-        pass
+        if is_intersection_position(position):
+            assert position in self.grid.intersections, "Agent cannot move on a nonexistent intersection"
+            intersection = self.grid.intersections[position]
+            assert intersection.contains_agent(agent_id=agent_id), "Agent is not on this intersection"
+            intersection.move_agent(agent_id=agent_id,
+                                    speed=speed)
+
+        elif is_road_position(position):
+            assert position in self.grid.roads, "Agent cannot move on a nonexistent road"
+            road = self.grid.roads[position]
+            assert road.contains_agent(agent_id=agent_id), "Agent is not on this road"
+            road.move_agent(agent_id=agent_id, speed=speed)
+
+        else:
+            raise ValueError("Position cannot be decoded")
 
     def get_obstacle_distance(self, position: Position, agent_id: VehicleId) -> DiscreteLength:
-        return discretize_length(1.)
+        if is_intersection_position(position):
+            assert position in self.grid.intersections, "Cannot check if agent is leaving on a nonexistent intersection"
+            intersection = self.grid.intersections[position]
+            assert intersection.contains_agent(agent_id=agent_id), "Agent is not on this intersection"
+            return intersection.get_obstacle_distance(agent_id=agent_id)
 
+        if is_road_position(position):
+            assert position in self.grid.roads, "Cannot check if agent is leaving on a nonexistent road"
+            road = self.grid.roads[position]
+            assert road.contains_agent(agent_id=agent_id), "Agent is not on this road"
+            return road.get_obstacle_distance(agent_id=agent_id)
 
-class DummyModel(Model):
-    def __init__(self, seed=None) -> None:
-        super().__init__(seed=seed)
+        raise ValueError("Position cannot be decoded")
 
-        self.running = False
+    def can_accept_agent(self, position: Position, agent_id: VehicleId, length: DiscreteLength) -> bool:
+        if is_intersection_position(position):
+            assert position in self.grid.intersections, "Cannot check if agent is leaving on a nonexistent intersection"
+            intersection = self.grid.intersections[position]
+            assert not intersection.contains_agent(agent_id=agent_id), "Agent is on this intersection"
+            return intersection.can_accept_agent(agent_id=agent_id, length=length)
 
-    def add_to_intersection(self, node_id: int, agent_id: int) -> None:
-        pass
+        if is_road_position(position):
+            assert position in self.grid.roads, "Cannot check if agent is leaving on a nonexistent road"
+            road = self.grid.roads[position]
+            assert not road.contains_agent(agent_id=agent_id), "Agent is on this road"
+            return road.can_accept_agent(agent_id=agent_id, length=length)
 
-    def add_to_road(self,
-                    road_id: tuple[int, int],
-                    agent_id: int,
-                    color: np.ndarray,
-                    length: DiscreteLength) -> None:
-        pass
-
-    def is_agent_leaving_intersection(self, node_id: int, agent_id: VehicleId, speed: DiscreteSpeed) -> bool:
-        return False
-
-    def is_agent_leaving_road(self, road_id: tuple[int, int], agent_id: VehicleId, speed: DiscreteSpeed) -> bool:
-        return False
+        raise ValueError("Position cannot be decoded")
