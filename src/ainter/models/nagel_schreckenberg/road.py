@@ -74,14 +74,24 @@ class Road:
         self.grid = np.where(self.grid == agent_id, NULL_VEHICLE_ID, self.grid)
 
     def move_agent(self, agent_id: VehicleId, speed: DiscreteSpeed) -> None:
+        assert self.contains_agent(agent_id), "Road must contain this agent"
+
         if speed < 0 or speed > self.grid.shape[0]:
             raise ValueError("Incorrect speed provided")
 
         agent_start = np.where(self.grid == agent_id)[0][0]
         agent_lane = np.where(self.grid == agent_id)[1][0]
         agent_length = np.sum(self.grid == agent_id)
+
         self.grid[agent_start:agent_start + agent_length, agent_lane] = ROAD_COLOR
-        self.grid[agent_start + speed:agent_start + agent_length + speed, agent_lane] = agent_id
+        if agent_start + agent_length + speed > self.grid.shape[0]:
+            assert np.all(self.grid[-agent_length:, agent_lane] != agent_id), 'Cannot put two agent at the same place'
+            self.grid[-agent_length:, agent_lane] = agent_id
+        else:
+            assert np.all( self.grid[agent_start + speed:agent_start + agent_length + speed, agent_lane] != agent_id), 'Cannot put two agent at the same place'
+            self.grid[agent_start + speed:agent_start + agent_length + speed, agent_lane] = agent_id
+
+        assert self.contains_agent(agent_id), "Road must contain this agent"
 
     def get_length_to_obstacle(self, agent_id: VehicleId) -> DiscreteLength:
         agent_start = np.where(self.grid == agent_id)[0][0]
@@ -108,3 +118,27 @@ class Road:
 
     def can_accept_agent(self, agent_id: VehicleId, length: DiscreteLength) -> bool:
         return (not self.contains_agent(agent_id)) and np.all(self.grid[:length, :] == NULL_VEHICLE_ID)
+
+    def get_obstacle_distance(self, agent_id: VehicleId) -> DiscreteLength:
+        agent_indices = np.where(self.grid == agent_id)
+        if len(agent_indices[0]) == 0:
+            raise ValueError("Agent not found on road")
+
+        agent_start = agent_indices[0][0]
+        agent_lane = agent_indices[1][0]
+        agent_length = np.sum(self.grid[:, agent_lane] == agent_id)
+        agent_end = agent_start + agent_length - 1
+        assert self.grid[agent_end, agent_lane] == agent_id, "Agent must be traced"
+        road_length = self.grid.shape[0]
+
+        if agent_end >= road_length - 1:
+            return discretize_length(0.)
+
+        distance_to_obstacle = road_length - agent_end - 1
+
+        for i in range(agent_end + 1, road_length):
+            if self.grid[i, agent_lane] != NULL_VEHICLE_ID:
+                distance_to_obstacle = i - agent_end - 1
+                break
+
+        return distance_to_obstacle

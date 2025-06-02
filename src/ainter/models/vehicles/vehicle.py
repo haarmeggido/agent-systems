@@ -7,7 +7,7 @@ import numpy as np
 from mesa import Agent, Model
 
 from ainter.models.nagel_schreckenberg.units import discretize_length, discretize_speed, discretize_acceleration, \
-    DiscreteLength, DiscreteAcceleration, DiscreteSpeed
+    DiscreteLength, DiscreteAcceleration, DiscreteSpeed, SPEED_MAX, get_breaking_distance, convert_km_h_to_m_s
 
 type VehicleId = int
 type IntersectionPosition = int
@@ -46,22 +46,22 @@ class VehicleType(IntEnum):
             case VehicleType.CAR:
                 return VehicleCharacteristic(length=discretize_length(4.5),
                                              acc_forward=discretize_acceleration(2.),
-                                             acc_backward=discretize_acceleration(-2))
+                                             acc_backward=discretize_acceleration(2))
 
             case VehicleType.BUS:
                 return VehicleCharacteristic(length=discretize_length(12.),
                                              acc_forward=discretize_acceleration(2.),
-                                             acc_backward=discretize_acceleration(-2.))
+                                             acc_backward=discretize_acceleration(2.))
 
             case VehicleType.TRUCK:
                 return VehicleCharacteristic(length=discretize_length(14.),
                                              acc_forward=discretize_acceleration(2.),
-                                             acc_backward=discretize_acceleration(-2.))
+                                             acc_backward=discretize_acceleration(2.))
 
             case VehicleType.MOTORCYCLE:
                 return VehicleCharacteristic(length=discretize_length(2.5),
                                              acc_forward=discretize_acceleration(2.5),
-                                             acc_backward=discretize_acceleration(-2))
+                                             acc_backward=discretize_acceleration(2))
 
         raise ValueError("Unknown Vehicle Type provided")
 
@@ -97,7 +97,7 @@ class Vehicle(Agent):
         self.from_node = self.path[0]
         self.to_node = self.path[-1]
         self.pos = self.from_node
-        self.color = np.array([self.random.randint(128, 181) for _ in range(3)], dtype=np.uint8)
+        self.color = np.array([self.random.randint(64, 181) for _ in range(3)], dtype=np.uint8)
         _ = self.model.add_agent_to_environment(position=self.pos, agent_id=self.unique_id)
 
 
@@ -105,11 +105,15 @@ class Vehicle(Agent):
         if self.finished():
             raise ValueError("Agent should be removed")
 
+        distance = self.model.get_obstacle_distance(self.pos, self.unique_id)
+        self.speed = self.decide_speed(distance)
+        self.model.move_agent(position=self.pos,
+                              agent_id=self.unique_id,
+                              speed=self.speed)
+
         if self.model.is_agent_leaving(position=self.pos,
                                        agent_id=self.unique_id,
                                        speed=self.speed):
-            self.model.remove_agent_from_environment(position=self.pos,
-                                                     agent_id=self.unique_id)
             if self.is_on_intersection():
                 current_journey_index = self.path.index(self.pos)
                 self.pos = (self.path[current_journey_index], self.path[current_journey_index + 1])
@@ -127,13 +131,6 @@ class Vehicle(Agent):
             else:
                 raise ValueError("The position of an agent cannot be determined")
 
-        distance = self.model.get_obstacle_distance(position=self.pos,
-                                                    agent_id=self.unique_id)
-        self.speed = self.decide_speed(distance)
-        self.model.move_agent(position=self.pos,
-                              agent_id=self.unique_id,
-                              speed=self.speed)
-
     def finished(self) -> bool:
         """Check if the agent has reached its destination"""
         return self.pos == self.to_node
@@ -146,6 +143,18 @@ class Vehicle(Agent):
             self.model.deregister_agent(self)
 
     def decide_speed(self, distance: DiscreteLength) -> DiscreteSpeed:
+        nbd = get_breaking_distance(self.speed, self.type.get_characteristic().acc_backward)
+
+        if distance < nbd:
+            if self.speed < self.type.get_characteristic().acc_backward:
+                self.speed = 0
+            else:
+                self.speed -= self.type.get_characteristic().acc_backward
+        else:
+            self.speed += self.type.get_characteristic().acc_forward
+            if self.speed > discretize_speed(convert_km_h_to_m_s(SPEED_MAX)):
+                self.speed = discretize_speed(convert_km_h_to_m_s(SPEED_MAX))
+
         return self.speed
 
     def is_on_intersection(self) -> bool:

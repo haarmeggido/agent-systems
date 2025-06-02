@@ -3,7 +3,7 @@ from typing import Self, Any
 
 import numpy as np
 
-from ainter.models.nagel_schreckenberg.units import DiscreteSpeed, ROAD_COLOR, DiscreteLength
+from ainter.models.nagel_schreckenberg.units import DiscreteSpeed, ROAD_COLOR, DiscreteLength, discretize_length
 from ainter.models.vehicles.vehicle import VehicleId
 
 
@@ -49,3 +49,6 @@ class Intersection:
 
     def can_accept_agent(self, agent_id: VehicleId, length: DiscreteLength) -> bool:
         return True
+
+    def get_obstacle_distance(self, agent_id: VehicleId) -> DiscreteLength:
+        return discretize_length(1.)

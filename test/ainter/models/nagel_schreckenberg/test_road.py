@@ -12,7 +12,8 @@ from ainter.configs.env_creation import EnvConfig, PhysicsConfig, VehiclesConfig
 from ainter.models.nagel_schreckenberg.environment import Environment
 from ainter.models.nagel_schreckenberg.model import NaSchUrbanModel
 from ainter.models.nagel_schreckenberg.road import Road
-from ainter.models.nagel_schreckenberg.units import get_time_density_strategy, discretize_time, TimeDensity, ROAD_COLOR
+from ainter.models.nagel_schreckenberg.units import get_time_density_strategy, discretize_time, TimeDensity, ROAD_COLOR, \
+    discretize_length
 from ainter.models.vehicles.vehicle import Vehicle, NULL_VEHICLE_ID
 from test.ainter.test_fixtures import seed
 from test.ainter.models.vehicles.test_vehicle import agent_type
@@ -132,3 +133,38 @@ def test_remove_agent(seed, road_json, color):
 
         road_json.render_lut[:] = ROAD_COLOR
         road_json.grid[:] = NULL_VEHICLE_ID
+
+@pytest.mark.parametrize("agent_id", [1111, 1, 2, 987, 1223,])
+@pytest.mark.parametrize("speed", [0, 1, 2, 5, 7, 10,])
+def test_move_agent(road_json, agent_type, agent_id, speed):
+    length = agent_type.get_characteristic().length
+    assert not road_json.contains_agent(agent_id), "Road must be empty"
+
+    for lane in range(road_json.lanes):
+        color = np.zeros((3,), dtype=np.uint8)
+        road_json.add_agent(agent_id, color, lane, length)
+
+        assert road_json.contains_agent(agent_id), "Agent should be added"
+
+        initial_positions = np.where(road_json.grid == agent_id)
+        initial_start = initial_positions[0][0]
+        initial_end = initial_start + length
+
+        if initial_end + speed > road_json.grid.shape[0]:
+            road_json.grid[:] = 0
+            road_json.render_lut[:] = ROAD_COLOR
+            continue
+
+        road_json.move_agent(agent_id, speed)
+
+        moved_positions = np.where(road_json.grid == agent_id)
+        moved_start = moved_positions[0][0]
+        moved_end = moved_start + length
+
+        assert moved_start == initial_start + speed, f"Agent should move by {speed} cells"
+        assert moved_end == initial_end + speed, f"End position should also move by {speed} cells"
+        assert moved_end - moved_start == length, "Agent should have the same length"
+        assert moved_positions[1][0] == lane, f"Lane should not change"
+
+        road_json.grid[:] = NULL_VEHICLE_ID
+        road_json.render_lut[:] = ROAD_COLOR

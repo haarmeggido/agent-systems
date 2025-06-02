@@ -2,6 +2,7 @@ import itertools
 
 import pytest
 
+from ainter.models.nagel_schreckenberg.units import discretize_length
 from ainter.models.vehicles.vehicle import Vehicle, VehicleType, is_intersection_position
 from test.ainter.models.dummy_model import DummyModel
 from test.ainter.test_fixtures import seed
@@ -12,6 +13,9 @@ def mock_is_agent_leaving_false(position, agent_id, speed):
 
 def mock_is_agent_leaving_true(position, agent_id, speed):
     return True
+
+def mock_get_obstacle_distance(self, position, agent_id):
+    return discretize_length(5.)
 
 @pytest.fixture(params=[VehicleType.MOTORCYCLE, VehicleType.CAR, VehicleType.BUS, VehicleType.TRUCK,])
 def agent_type(request):
@@ -37,6 +41,7 @@ def test_vehicle_creation(seed, agent_type, path):
 def test_vehicle_iterates_over_path(monkeypatch, seed, agent_type, path):
     dummy_model = DummyModel(seed=seed)
     monkeypatch.setattr(dummy_model, "is_agent_leaving", mock_is_agent_leaving_true)
+    monkeypatch.setattr(DummyModel, "get_obstacle_distance", mock_get_obstacle_distance)
 
     agent = Vehicle(model=dummy_model,
                     vehicle_type=agent_type,
@@ -72,6 +77,7 @@ def test_vehicle_iterates_over_path(monkeypatch, seed, agent_type, path):
 def test_vehicle_stays_at_position(monkeypatch, seed, agent_type, intersection, road, num_steps):
     dummy_model = DummyModel(seed=seed)
     monkeypatch.setattr(dummy_model, "is_agent_leaving", mock_is_agent_leaving_false)
+    monkeypatch.setattr(DummyModel, "get_obstacle_distance", mock_get_obstacle_distance)
 
     agent = Vehicle(model=dummy_model,
                     vehicle_type=agent_type,

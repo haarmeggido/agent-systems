@@ -166,4 +166,31 @@ class NaSchUrbanModel(Model, VehicleModel):
             raise ValueError("Position cannot be decoded")
 
     def get_obstacle_distance(self, position: Position, agent_id: VehicleId) -> DiscreteLength:
-        return discretize_length(1.)
+        if is_intersection_position(position):
+            assert position in self.grid.intersections, "Cannot check if agent is leaving on a nonexistent intersection"
+            intersection = self.grid.intersections[position]
+            assert intersection.contains_agent(agent_id=agent_id), "Agent is not on this intersection"
+            return intersection.get_obstacle_distance(agent_id=agent_id)
+
+        if is_road_position(position):
+            assert position in self.grid.roads, "Cannot check if agent is leaving on a nonexistent road"
+            road = self.grid.roads[position]
+            assert road.contains_agent(agent_id=agent_id), "Agent is not on this road"
+            return road.get_obstacle_distance(agent_id=agent_id)
+
+        raise ValueError("Position cannot be decoded")
+
+    def can_accept_agent(self, position: Position, agent_id: VehicleId, length: DiscreteLength) -> bool:
+        if is_intersection_position(position):
+            assert position in self.grid.intersections, "Cannot check if agent is leaving on a nonexistent intersection"
+            intersection = self.grid.intersections[position]
+            assert not intersection.contains_agent(agent_id=agent_id), "Agent is on this intersection"
+            return intersection.can_accept_agent(agent_id=agent_id, length=length)
+
+        if is_road_position(position):
+            assert position in self.grid.roads, "Cannot check if agent is leaving on a nonexistent road"
+            road = self.grid.roads[position]
+            assert not road.contains_agent(agent_id=agent_id), "Agent is on this road"
+            return road.can_accept_agent(agent_id=agent_id, length=length)
+
+        raise ValueError("Position cannot be decoded")
