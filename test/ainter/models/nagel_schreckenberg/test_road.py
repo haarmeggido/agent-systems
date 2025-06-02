@@ -317,3 +317,64 @@ def test_get_agent_distance(road_json, road_grid, lane, agent_id, expected):
     result = road_json.get_length_to_obstacle(agent_id)
 
     assert result == expected, "Distance must match"
+
+
+@pytest.mark.parametrize("road_grid,lane,agent_id,speed,expected", [
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 2, 2, 2, 2, 0, 0, 0],], dtype=np.uint16).T,
+        0,
+        2,
+        0,
+        False,
+    ),
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 2, 2, 2, 2, 0, 0, 0],], dtype=np.uint16).T,
+        0,
+        2,
+        1,
+        False,
+    ),
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 2, 2, 2, 2, 0, 0, 0],], dtype=np.uint16).T,
+        0,
+        2,
+        2,
+        False,
+    ),
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 2, 2, 2, 2, 0, 0, 0],], dtype=np.uint16).T,
+        0,
+        2,
+        3,
+        True,
+    ),
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 2, 2, 2, 2, 0, 0, 0],], dtype=np.uint16).T,
+        0,
+        2,
+        4,
+        True,
+    ),
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 2, 2, 2, 2, 0, 0, 0],], dtype=np.uint16).T,
+        0,
+        2,
+        5,
+        True,
+    ),
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 2, 2, 2, 2, 0, 0, 0],], dtype=np.uint16).T,
+        0,
+        2,
+        6,
+        True,
+    ),
+])
+def test_agent_leaving_status(road_json, road_grid, lane, agent_id, speed, expected):
+    road_json.grid = deepcopy(road_grid)
+    road_json.lanes = road_grid.shape[1]
+
+    assert road_json.contains_agent(agent_id), "Road must contain added agent"
+    result = road_json.is_agent_leaving(agent_id, speed)
+
+    assert result == expected, "Status must match"

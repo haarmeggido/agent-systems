@@ -105,7 +105,7 @@ class Vehicle(Agent):
         if self.finished():
             raise ValueError("Agent should be removed")
 
-        distance = self.model.get_obstacle_distance(self.pos, self.unique_id)
+        distance = int(self.model.get_obstacle_distance(self.pos, self.unique_id))
         self.speed = self.decide_speed(distance)
         self.model.move_agent(position=self.pos,
                               agent_id=self.unique_id,
@@ -114,6 +114,8 @@ class Vehicle(Agent):
         if self.model.is_agent_leaving(position=self.pos,
                                        agent_id=self.unique_id,
                                        speed=self.speed):
+            self.model.remove_agent_from_environment(position=self.pos,
+                                                     agent_id=self.unique_id)
             if self.is_on_intersection():
                 current_journey_index = self.path.index(self.pos)
                 self.pos = (self.path[current_journey_index], self.path[current_journey_index + 1])
@@ -143,9 +145,9 @@ class Vehicle(Agent):
             self.model.deregister_agent(self)
 
     def decide_speed(self, distance: DiscreteLength) -> DiscreteSpeed:
-        nbd = get_breaking_distance(self.speed, self.type.get_characteristic().acc_backward)
+        nbd = get_breaking_distance(self.speed, self.type.get_characteristic().acc_backward) + self.random.randint(1, 2)
 
-        if distance < nbd:
+        if distance <= nbd:
             if self.speed < self.type.get_characteristic().acc_backward:
                 self.speed = 0
             else:

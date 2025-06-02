@@ -98,3 +98,4 @@ def test_vehicle_stays_at_position(monkeypatch, seed, agent_type, intersection, 
         assert not agent.finished(), "Agent cannot finish"
         assert agent.pos == road, "Agent must stay at the road"
     assert not agent.finished(), "Agent cannot finish"
+
