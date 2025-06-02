@@ -20,7 +20,7 @@ class Intersection:
 
     @classmethod
     def from_graph_data(cls, osm_id: int,
-                        in_edges_info: dict[tuple[int, int], Any],
+                        edges_info: dict[tuple[int, int], Any],
                         node_info: dict[str, Any]) -> Self:
         return cls(osm_id=osm_id,
                    grid=np.zeros(shape=(10, 10), dtype=np.uint16),
@@ -33,6 +33,9 @@ class Intersection:
     def remove_agent(self, agent_id: VehicleId) -> None:
         pass
 
+    def move_agent(self, agent_id: VehicleId, speed: DiscreteSpeed) -> None:
+        pass
+
     def is_agent_leaving(self, agent_id: VehicleId, speed: DiscreteSpeed) -> bool:
         return True
 
@@ -40,4 +43,4 @@ class Intersection:
         return self.render_lut[self.grid.T]
 
     def contains_agent(self, agent_id) -> bool:
-        return np.any(self.grid == agent_id)
+        return True

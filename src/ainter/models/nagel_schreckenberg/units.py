@@ -29,8 +29,6 @@ ACCELERATION_MIN: Final[PhysicalAcceleration] = np.float64(-1.5)
 
 ROAD_COLOR: Final[np.uint8] = np.uint8(64)
 
-MIN_JUMP_PATH_NODES_LENGTH: Final = 4
-
 
 def discretize_time(time_obj: time) -> DiscreteTime:
     return np.uint32(np.round((time_obj.hour * 3600 + time_obj.minute * 60 + time_obj.second) / DELTA_TIME))
@@ -80,8 +78,14 @@ class NormalTimeDensity(TimeDensity):
 
 class UniformTimeDensity(TimeDensity):
 
+    def __init__(self, p: float) -> None:
+        if not (0. <= p <= 1.):
+            raise ValueError(f"{p=} is not a valid probability value")
+
+        self.p = p
+
     def __call__(self, t: DiscreteTime) -> float:
-        return 0.2
+        return self.p
 
 
 def get_time_density_strategy(code: str) -> TimeDensity:
@@ -90,7 +94,9 @@ def get_time_density_strategy(code: str) -> TimeDensity:
             return NormalTimeDensity()
 
         case "uniform_dist":
-            return UniformTimeDensity()
+            return UniformTimeDensity(0.2)
 
-        case _:
-            raise ValueError("Unknown strategy code provided")
+        case "null_dist":
+            return UniformTimeDensity(0.)
+
+    raise ValueError("Unknown strategy code provided")

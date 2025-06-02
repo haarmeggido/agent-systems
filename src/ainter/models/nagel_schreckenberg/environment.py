@@ -5,6 +5,7 @@ from networkx.classes import MultiDiGraph, DiGraph
 
 from ainter.models.nagel_schreckenberg.intersection import Intersection
 from ainter.models.nagel_schreckenberg.road import Road
+from ainter.models.vehicles.vehicle import RoadPosition, IntersectionPosition
 
 
 def create_roads_from_graph(graph: MultiDiGraph, graph_di: DiGraph) -> dict[tuple[int, int], Road]:
@@ -27,7 +28,7 @@ def create_intersections_from_graph(graph_di: DiGraph) -> dict[int, Intersection
         edges_data = {edge: graph_di.edges[edge]
                       for edge in set(graph_di.in_edges(node_id)) | set(graph_di.out_edges(node_id))}
         new_intersection = Intersection.from_graph_data(osm_id=node_id,
-                                                        in_edges_info=edges_data,
+                                                        edges_info=edges_data,
                                                         node_info=node_data)
         intersections.update({node_id: new_intersection})
     return intersections
@@ -36,8 +37,8 @@ def create_intersections_from_graph(graph_di: DiGraph) -> dict[int, Intersection
 @dataclass(slots=True)
 class Environment:
     road_graph: DiGraph
-    roads: dict[tuple[int, int], Road]
-    intersections: dict[int, Intersection]
+    intersections: dict[IntersectionPosition, Intersection]
+    roads: dict[RoadPosition, Road]
 
     @classmethod
     def from_directed_graph(cls, graph: MultiDiGraph) -> Self:

@@ -2,8 +2,9 @@ import itertools
 
 import pytest
 
-from ainter.models.nagel_schreckenberg.model import DummyModel
 from ainter.models.vehicles.vehicle import Vehicle, VehicleType, is_intersection_position
+from test.ainter.models.dummy_model import DummyModel
+from test.ainter.test_fixtures import seed
 
 
 def mock_is_agent_leaving_false(position, agent_id, speed):
@@ -12,9 +13,14 @@ def mock_is_agent_leaving_false(position, agent_id, speed):
 def mock_is_agent_leaving_true(position, agent_id, speed):
     return True
 
-@pytest.mark.parametrize("seed", [0, 111, 222, 333, 444, 555, 666, 777, 888, 999])
-@pytest.mark.parametrize("agent_type", [VehicleType.MOTORCYCLE, VehicleType.CAR, VehicleType.BUS, VehicleType.TRUCK,])
-@pytest.mark.parametrize("path", [[0, 1], [0, 1, 2], [0, 1, 2, 3], [1, 2, 3]])
+@pytest.fixture(params=[VehicleType.MOTORCYCLE, VehicleType.CAR, VehicleType.BUS, VehicleType.TRUCK,])
+def agent_type(request):
+    return request.param
+
+@pytest.fixture(params=[[0, 1], [0, 1, 2], [0, 1, 2, 3], [1, 2, 3]])
+def path(request):
+    return request.param
+
 def test_vehicle_creation(seed, agent_type, path):
     dummy_model = DummyModel(seed=seed)
     agent = Vehicle(model=dummy_model,
@@ -28,9 +34,6 @@ def test_vehicle_creation(seed, agent_type, path):
     assert agent.to_node == path[-1], "Agent must finish on the end"
     assert agent.finished() == False, "Agent cannot be finishing"
 
-@pytest.mark.parametrize("seed", [0, 111, 222, 333, 444, 555, 666, 777, 888, 999])
-@pytest.mark.parametrize("agent_type", [VehicleType.MOTORCYCLE, VehicleType.CAR, VehicleType.BUS, VehicleType.TRUCK,])
-@pytest.mark.parametrize("path", [[0, 1], [0, 1, 2], [0, 1, 2, 3], [1, 2, 3]])
 def test_vehicle_iterates_over_path(monkeypatch, seed, agent_type, path):
     dummy_model = DummyModel(seed=seed)
     monkeypatch.setattr(dummy_model, "is_agent_leaving", mock_is_agent_leaving_true)
@@ -63,8 +66,6 @@ def test_vehicle_iterates_over_path(monkeypatch, seed, agent_type, path):
     assert exc_info.type is ValueError, "Agent cannot traverse after end of the path (exception type)"
     assert str(exc_info.value) == "Agent should be removed", "Correct string of exception"
 
-@pytest.mark.parametrize("seed", [0, 111, 222, 333, 444, 555, 666, 777, 888, 999])
-@pytest.mark.parametrize("agent_type", [VehicleType.MOTORCYCLE, VehicleType.CAR, VehicleType.BUS, VehicleType.TRUCK,])
 @pytest.mark.parametrize("intersection", [0, 1, 2, 3, 4])
 @pytest.mark.parametrize("road", [(0, 1), (1, 0), (1, 2), (2, 3), (2, 0)])
 @pytest.mark.parametrize("num_steps", [1, 10, 50, 100])

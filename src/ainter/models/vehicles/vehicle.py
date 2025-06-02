@@ -1,6 +1,7 @@
 import contextlib
 from dataclasses import dataclass
 from enum import auto, IntEnum
+from typing import Final
 
 import numpy as np
 from mesa import Agent, Model
@@ -12,6 +13,8 @@ type VehicleId = int
 type IntersectionPosition = int
 type RoadPosition = tuple[int, int]
 type Position = IntersectionPosition | RoadPosition
+
+NULL_VEHICLE_ID: Final[VehicleId] = 0
 
 def is_intersection_position(pos: Position) -> bool:
     return isinstance(pos, int)
@@ -95,7 +98,7 @@ class Vehicle(Agent):
         self.to_node = self.path[-1]
         self.pos = self.from_node
         self.color = np.array([self.random.randint(128, 181) for _ in range(3)], dtype=np.uint8)
-        self.model.add_agent_to_environment(position=self.pos, agent_id=self.unique_id)
+        _ = self.model.add_agent_to_environment(position=self.pos, agent_id=self.unique_id)
 
 
     def step(self) -> None:
@@ -110,16 +113,16 @@ class Vehicle(Agent):
             if self.is_on_intersection():
                 current_journey_index = self.path.index(self.pos)
                 self.pos = (self.path[current_journey_index], self.path[current_journey_index + 1])
-                self.model.add_agent_to_environment(position=self.pos,
-                                                    agent_id=self.unique_id,
-                                                    color=self.color,
-                                                    length=self.type.get_characteristic().length)
+                _ = self.model.add_agent_to_environment(position=self.pos,
+                                                        agent_id=self.unique_id,
+                                                        color=self.color,
+                                                        length=self.type.get_characteristic().length)
 
             elif self.is_on_road():
                 current_journey_index = self.path.index(self.pos[1])
                 self.pos = self.path[current_journey_index]
-                self.model.add_agent_to_environment(position=self.pos,
-                                                    agent_id=self.unique_id)
+                _ = self.model.add_agent_to_environment(position=self.pos,
+                                                        agent_id=self.unique_id)
 
             else:
                 raise ValueError("The position of an agent cannot be determined")

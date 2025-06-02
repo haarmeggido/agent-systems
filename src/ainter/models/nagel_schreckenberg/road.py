@@ -6,7 +6,7 @@ from shapely import LineString
 
 from ainter.models.nagel_schreckenberg.units import discretize_length, PhysicalLength, DEFAULT_ROAD_MAX_SPEED, \
     PhysicalSpeed, DiscreteSpeed, DiscreteLength, ROAD_COLOR, convert_km_h_to_m_s
-from ainter.models.vehicles.vehicle import VehicleId
+from ainter.models.vehicles.vehicle import VehicleId, NULL_VEHICLE_ID
 
 
 @dataclass(slots=True)
@@ -34,14 +34,16 @@ class Road:
         osm_id = edge_info['osmid']
         lanes = int(edge_info.get('lanes', '1'))
         length = edge_info['length']
-        cells_num = discretize_length(length.astype(np.float32))
+        cells_num = discretize_length(length)
         max_speed = convert_km_h_to_m_s(float(edge_info.get('max_speed', DEFAULT_ROAD_MAX_SPEED)))
         name = edge_info.get('name', None)
         name = name if name != '' else None
         is_oneway = edge_info['oneway']
         is_reversed = edge_info['reversed']
-        geometry = edge_info.get('geometry', LineString(coordinates=[[start_node_info['x'], start_node_info['y']],
-                                                                     [end_node_info['x'], end_node_info['y']]]))
+        geometry = edge_info.get('geometry', None)
+        if geometry is None:
+            geometry = LineString(coordinates=[[start_node_info['x'], start_node_info['y']],
+                                               [end_node_info['x'], end_node_info['y']]])
 
         return cls(osm_id=osm_id,
                    grid=np.zeros(shape=(cells_num, lanes), dtype=np.uint16),
@@ -54,8 +56,6 @@ class Road:
                    geometry=geometry)
 
     def add_agent(self, agent_id: VehicleId, color: np.ndarray, lane: int, length: DiscreteLength) -> None:
-        self.render_lut[agent_id] = color
-
         if lane < 0 or lane > self.lanes:
             raise ValueError("Incorrect lane number provided")
 
@@ -67,10 +67,11 @@ class Road:
 
         # TODO: Check if line is occupied
         self.grid[:length, lane] = agent_id
+        self.render_lut[agent_id] = color
 
     def remove_agent(self, agent_id: VehicleId) -> None:
         self.render_lut[agent_id] = ROAD_COLOR
-        self.grid = np.where(self.grid == agent_id, ROAD_COLOR, self.grid)
+        self.grid = np.where(self.grid == agent_id, NULL_VEHICLE_ID, self.grid)
 
     def move_agent(self, agent_id: VehicleId, speed: DiscreteSpeed) -> None:
         if speed < 0 or speed > self.grid.shape[0]:
@@ -104,4 +105,3 @@ class Road:
 
     def contains_agent(self, agent_id) -> bool:
         return np.any(self.grid == agent_id)
-
