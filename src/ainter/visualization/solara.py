@@ -8,7 +8,7 @@ import solara
 from mesa.visualization import SolaraViz
 from mesa.visualization.utils import update_counter
 
-from ainter.configs.env_creation import EnvConfig
+from ainter.configs.env_creation import EnvConfig, VehiclesConfig
 from ainter.models.nagel_schreckenberg.model import NaSchUrbanModel
 
 plt.rcParams['axes.facecolor'] = 'none'
@@ -23,6 +23,12 @@ def set_environment_config(env_config: EnvConfig) -> None:
             "type": "InputText",
             "value": 69,
             "label": "Random Seed",
+        },
+        "time_density_strategy": {
+            "type": "Select",
+            "value": env_config.vehicles.time_density_strategy_code,
+            "label": "Time Density Strategy",
+            "values": ["normal_dist", "uniform_dist", "null_dist"],
         },
         "env_config": env_config,
         # "n": {
@@ -142,7 +148,21 @@ def page() -> None:
     if shared_env_config is None:
         raise ValueError("Environment config not set. Please call `set_environment_config(...)` first.")
 
-    model = NaSchUrbanModel(shared_env_config["env_config"], seed=shared_env_config["seed"]["value"])
+    seed = int(shared_env_config["seed"]["value"])
+    strategy_code = shared_env_config["time_density_strategy"]["value"]
+
+    env_config: EnvConfig = shared_env_config["env_config"]
+    updated_vehicles_config = VehiclesConfig(
+        time_density_strategy_code=strategy_code,
+        min_node_path_length=env_config.vehicles.min_node_path_length
+    )
+    updated_env_config = EnvConfig(
+        physics=env_config.physics,
+        map_box=env_config.map_box,
+        vehicles=updated_vehicles_config
+    )
+
+    model = NaSchUrbanModel(updated_env_config, seed=seed)
 
     SolaraViz(
         model,
@@ -151,7 +171,20 @@ def page() -> None:
             roads_portrayal,
             intersections_portrayal,
         ],
-        model_params=shared_env_config,
+        model_params = {
+            "seed": {
+                "type": "InputText",
+                "value": seed,
+                "label": "Random Seed"
+            },
+            "time_density_strategy": {
+                "type": "Select",
+                "value": strategy_code,
+                "label": "Time Density Strategy",
+                "values": ["normal_dist", "uniform_dist", "null_dist"]
+            },
+            "env_config": updated_env_config
+        },
         name="Autonomous Intersection Model",
     )
 

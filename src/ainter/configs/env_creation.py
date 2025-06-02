@@ -43,9 +43,14 @@ class MapBoxConfig:
 
 @dataclass(slots=True, frozen=True)
 class VehiclesConfig:
-    time_density_strategy: TimeDensity
+    time_density_strategy_code: str
     min_node_path_length: int
 
+    @property
+    def time_density_strategy(self) -> TimeDensity:
+        return get_time_density_strategy(self.time_density_strategy_code)
+
+    
     @classmethod
     def from_json(cls, json_data: dict[str, Any]) -> Self | dict[str, Any]:
         if not ('time_density_strategy' in json_data and 'min_node_path_length' in json_data):
@@ -55,8 +60,10 @@ class VehiclesConfig:
         if min_node_path_length < 1:
             raise ValueError(f"{min_node_path_length=} cannot be zero-like or negative")
 
-        return cls(time_density_strategy=get_time_density_strategy(json_data['time_density_strategy']),
-                   min_node_path_length=min_node_path_length)
+        return cls(
+                    time_density_strategy_code=json_data['time_density_strategy'],
+                    min_node_path_length=min_node_path_length
+                )
 
 
 @dataclass(slots=True, frozen=True)
