@@ -103,5 +103,8 @@ class Road:
     def render(self) -> np.ndarray:
         return self.render_lut[self.grid.T]
 
-    def contains_agent(self, agent_id) -> bool:
+    def contains_agent(self, agent_id: VehicleId) -> bool:
         return np.any(self.grid == agent_id)
+
+    def can_accept_agent(self, agent_id: VehicleId, length: DiscreteLength) -> bool:
+        return (not self.contains_agent(agent_id)) and np.all(self.grid[:length, :] == NULL_VEHICLE_ID)

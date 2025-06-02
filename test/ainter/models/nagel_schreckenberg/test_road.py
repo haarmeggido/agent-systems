@@ -22,7 +22,7 @@ def powerset(iterable):
     s = list(iterable)
     return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
 
-@pytest.fixture(params=['./test/resources/small_graph.json'])
+@pytest.fixture(params=['./test/resources/models/small_graph.json'])
 def graph(request):
     with open(request.param, "r", encoding='utf-8') as in_file:
         data = json.load(in_file)
@@ -37,7 +37,7 @@ def graph(request):
 def env_config(monkeypatch):
     return EnvConfig(physics=PhysicsConfig(start_time=time.fromisoformat('08:00:00'),
                                            end_time=time.fromisoformat('20:00:00')),
-                     vehicles=VehiclesConfig(time_density_strategy=get_time_density_strategy("null_dist"),
+                     vehicles=VehiclesConfig(time_density_strategy=get_time_density_strategy('null_dist'),
                                              min_node_path_length=1),
                      map_box=MapBoxConfig(left=0.0,
                                           bottom=0.0,

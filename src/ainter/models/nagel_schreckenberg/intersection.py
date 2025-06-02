@@ -3,7 +3,7 @@ from typing import Self, Any
 
 import numpy as np
 
-from ainter.models.nagel_schreckenberg.units import DiscreteSpeed, ROAD_COLOR
+from ainter.models.nagel_schreckenberg.units import DiscreteSpeed, ROAD_COLOR, DiscreteLength
 from ainter.models.vehicles.vehicle import VehicleId
 
 
@@ -22,6 +22,8 @@ class Intersection:
     def from_graph_data(cls, osm_id: int,
                         edges_info: dict[tuple[int, int], Any],
                         node_info: dict[str, Any]) -> Self:
+
+
         return cls(osm_id=osm_id,
                    grid=np.zeros(shape=(10, 10), dtype=np.uint16),
                    x=node_info['x'],
@@ -42,5 +44,8 @@ class Intersection:
     def render(self) -> np.ndarray:
         return self.render_lut[self.grid.T]
 
-    def contains_agent(self, agent_id) -> bool:
+    def contains_agent(self, agent_id: VehicleId) -> bool:
+        return True
+
+    def can_accept_agent(self, agent_id: VehicleId, length: DiscreteLength) -> bool:
         return True

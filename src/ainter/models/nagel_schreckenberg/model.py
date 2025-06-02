@@ -1,3 +1,4 @@
+import itertools
 from abc import abstractmethod, ABC
 
 from mesa import Model, Agent
@@ -73,20 +74,27 @@ class NaSchUrbanModel(Model, VehicleModel):
     def spawn_agent(self) -> Agent:
         types = list(VehicleType)
         graph = self.grid.road_graph
+        vehicle_type: VehicleType = self.random.choices(types, weights=[x.get_pdf() for x in types], k=1)[0]
+        vehicle_minimum_road_length = vehicle_type.get_characteristic().length + discretize_length(2.)
 
         while True:
             start_node = self.random.choice(list(graph.nodes))
             end_node_possibilities = list(descendants(graph, start_node))
             if len(end_node_possibilities) == 0:
                 continue
-                
+
             end_node = self.random.choice(end_node_possibilities)
             path = bfs_shortest_path(graph, start_node, end_node)
-            if len(path) >= self.min_node_path_length:
-                break
+            if len(path) < self.min_node_path_length:
+                continue
 
-        # Randomly select a vehicle type
-        vehicle_type = self.random.choices(types, weights=[x.get_pdf() for x in types], k=1)[0]
+            if any(map(lambda x: discretize_length(self.grid.roads[x].length) < vehicle_minimum_road_length,
+                       itertools.pairwise(path))):
+                continue
+
+            break
+
+
         return Vehicle(model=self,
                        vehicle_type=vehicle_type,
                        path=path)
@@ -115,7 +123,6 @@ class NaSchUrbanModel(Model, VehicleModel):
             intersection = self.grid.intersections[position]
             assert intersection.contains_agent(agent_id=agent_id), "Agent is not on this intersection"
             intersection.remove_agent(agent_id=agent_id)
-            return
 
         elif is_road_position(position):
             assert position in self.grid.roads, "Cannot add agent to nonexistent road"
