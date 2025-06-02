@@ -21,7 +21,7 @@ class Road:
     length: PhysicalLength
     geometry: LineString
     render_lut: np.ndarray = field(init=False,
-                                   default_factory=lambda: np.full(shape=(2 ** 17 - 1, 3),
+                                   default_factory=lambda: np.full(shape=(2 ** 16, 3),
                                                                    fill_value=ROAD_COLOR,
                                                                    dtype=np.uint8))
 
@@ -83,7 +83,7 @@ class Road:
         agent_lane = np.where(self.grid == agent_id)[1][0]
         agent_length = np.sum(self.grid == agent_id)
 
-        self.grid[agent_start:agent_start + agent_length, agent_lane] = ROAD_COLOR
+        self.grid[agent_start:agent_start + agent_length, agent_lane] = NULL_VEHICLE_ID
         if agent_start + agent_length + speed > self.grid.shape[0]:
             assert np.all(self.grid[-agent_length:, agent_lane] != agent_id), 'Cannot put two agent at the same place'
             self.grid[-agent_length:, agent_lane] = agent_id
@@ -96,16 +96,15 @@ class Road:
     def get_length_to_obstacle(self, agent_id: VehicleId) -> DiscreteLength:
         agent_start = np.where(self.grid == agent_id)[0][0]
         agent_lane = np.where(self.grid == agent_id)[1][0]
+        agent_length = np.sum(self.grid == agent_id)
+        agent_end = agent_start + agent_length - 1
         road_length = self.grid.shape[0]
 
-        if agent_start + 1 >= road_length:
-            return 0
+        for i in range(agent_end + 1, road_length):
+            if self.grid[i, agent_lane] != agent_id and self.grid[i, agent_lane] != NULL_VEHICLE_ID:
+                return i - agent_end - 1
 
-        for i in range(agent_start + 1, road_length):
-            if self.grid[i, agent_lane] != ROAD_COLOR:
-                return i - agent_start
-
-        return road_length - agent_start
+        return road_length - agent_end - 1
 
     def is_agent_leaving(self, agent_id: VehicleId, speed: DiscreteSpeed) -> bool:
         return np.any(self.grid[-(speed + 1):, :] == agent_id)

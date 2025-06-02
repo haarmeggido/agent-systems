@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 from datetime import time
 from itertools import chain, combinations
 
@@ -168,3 +169,151 @@ def test_move_agent(road_json, agent_type, agent_id, speed):
 
         road_json.grid[:] = NULL_VEHICLE_ID
         road_json.render_lut[:] = ROAD_COLOR
+
+@pytest.mark.parametrize("road_grid,lane,agent_id,color,length,speed,expected", [
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],], dtype=np.uint16).T,
+        0,
+        7,
+        np.array([0, 255, 0], dtype=np.uint8),
+        4,
+        0,
+        np.array([[7, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],], dtype=np.uint16).T,
+    ),
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],], dtype=np.uint16).T,
+        0,
+        7,
+        np.array([0, 255, 0], dtype=np.uint8),
+        5,
+        6,
+        np.array([[0, 0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],], dtype=np.uint16).T,
+    ),
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0],], dtype=np.uint16).T,
+        0,
+        7,
+        np.array([0, 255, 0], dtype=np.uint8),
+        5,
+        4,
+        np.array([[0, 0, 0, 0, 7, 7, 7, 7, 7, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0],], dtype=np.uint16).T,
+    ),
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 2, 2, 2, 2],], dtype=np.uint16).T,
+        0,
+        1,
+        np.array([0, 255, 0], dtype=np.uint8),
+        5,
+        9,
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 0, 2, 2, 2, 2],], dtype=np.uint16).T,
+    ),
+])
+def test_movement_from_start(road_json, road_grid, lane, agent_id, color, length, speed, expected):
+    road_json.grid = deepcopy(road_grid)
+    road_json.lanes = road_grid.shape[1]
+
+    assert not road_json.contains_agent(agent_id), "Road must be empty"
+    road_json.add_agent(agent_id, color, lane, length)
+
+    assert road_json.contains_agent(agent_id), "Road must contain added agent"
+    road_json.move_agent(agent_id, speed)
+
+    assert np.all(road_json.grid == expected), "Grid must match expectations"
+
+@pytest.mark.parametrize("road_grid,lane,agent_id,speed,expected", [
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 2, 2, 2, 2],], dtype=np.uint16).T,
+        0,
+        3,
+        3,
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 2, 2, 2, 2],], dtype=np.uint16).T,
+    ),
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 2, 2, 2, 2, 0, 0],], dtype=np.uint16).T,
+        0,
+        2,
+        2,
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 2, 2, 2, 2],], dtype=np.uint16).T,
+    ),
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 2, 2, 2, 2, 0, 0],], dtype=np.uint16).T,
+        0,
+        2,
+        3,
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 2, 2, 2, 2],], dtype=np.uint16).T,
+    ),
+
+])
+def test_movement_any_start(road_json, road_grid, lane, agent_id, speed, expected):
+    road_json.grid = deepcopy(road_grid)
+    road_json.lanes = road_grid.shape[1]
+
+    assert road_json.contains_agent(agent_id), "Road must contain added agent"
+    road_json.move_agent(agent_id, speed)
+
+    assert np.all(road_json.grid == expected), "Grid must match expectations"
+
+@pytest.mark.parametrize("road_grid,lane,agent_id,expected", [
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 2, 2, 2, 2, 0, 0, 0],], dtype=np.uint16).T,
+        0,
+        2,
+        3,
+    ),
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 2, 2, 2, 2, 0, 0],], dtype=np.uint16).T,
+        0,
+        2,
+        2,
+    ),
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 2, 2, 2, 2, 0],], dtype=np.uint16).T,
+        0,
+        2,
+        1,
+    ),
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 2, 2, 2, 2],], dtype=np.uint16).T,
+        0,
+        2,
+        0,
+    ),
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 2, 2, 2, 2],], dtype=np.uint16).T,
+        0,
+        3,
+        4,
+    ),
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 2, 2, 2, 2],], dtype=np.uint16).T,
+        0,
+        3,
+        3,
+    ),
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 2, 2, 2, 2],], dtype=np.uint16).T,
+        0,
+        3,
+        2,
+    ),
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 2, 2, 2, 2],], dtype=np.uint16).T,
+        0,
+        3,
+        1,
+    ),
+    (
+        np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2],], dtype=np.uint16).T,
+        0,
+        3,
+        0,
+    ),
+])
+def test_get_agent_distance(road_json, road_grid, lane, agent_id, expected):
+    road_json.grid = deepcopy(road_grid)
+    road_json.lanes = road_grid.shape[1]
+
+    assert road_json.contains_agent(agent_id), "Road must contain added agent"
+    result = road_json.get_length_to_obstacle(agent_id)
+
+    assert result == expected, "Distance must match"
