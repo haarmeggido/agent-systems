@@ -44,7 +44,7 @@ class VehicleModel(ABC):
 
 class NaSchUrbanModel(Model, VehicleModel):
 
-    def __init__(self, env_config: EnvConfig, seed: int = 42, time_density_strategy: str = "normal_dist") -> None:
+    def __init__(self, env_config: EnvConfig, seed = None, time_density_strategy: str = "normal_dist") -> None:
         super().__init__(seed=seed)
 
         self.graph = get_data_from_bbox(env_config.map_box)
