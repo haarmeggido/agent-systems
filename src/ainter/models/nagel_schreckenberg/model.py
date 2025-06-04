@@ -100,8 +100,8 @@ class NaSchUrbanModel(Model, VehicleModel):
             df_model = self.datacollector.get_model_vars_dataframe()
             df_agents = self.datacollector.get_agent_vars_dataframe()
 
-            df_model.to_csv("src/ainter/data/model_results.csv")
-            df_agents.to_csv("src/ainter/data/agent_results.csv")
+            df_model.to_csv("ainter/data/model_results.csv")
+            df_agents.to_csv("ainter/data/agent_results.csv")
 
 
     def spawn_agent(self) -> Agent:

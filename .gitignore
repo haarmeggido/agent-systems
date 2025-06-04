@@ -86,8 +86,6 @@ dmypy.json
 cython_debug/
 .idea/
 
-# my venv directory
 /agent-systems-env
-
-# images
 *.png
+src/ainter/data/cache/*
