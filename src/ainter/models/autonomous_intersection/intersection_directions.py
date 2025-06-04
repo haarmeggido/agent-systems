@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from enum import IntEnum, auto
 from typing import Self
 
@@ -16,3 +17,9 @@ class IntersectionEntranceDirection(IntEnum):
 
     def get_straight(self) -> Self:
         return self.get_left_of().get_left_of()
+
+
+@dataclass(slots=True)
+class IntersectionDirection:
+    direction: IntersectionEntranceDirection
+    lanes: int

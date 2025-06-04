@@ -4,8 +4,8 @@ from typing import Self, Any, Optional
 import numpy as np
 from shapely import LineString
 
-from ainter.models.nagel_schreckenberg.units import discretize_length, PhysicalLength, DEFAULT_ROAD_MAX_SPEED, \
-    PhysicalSpeed, DiscreteSpeed, DiscreteLength, ROAD_COLOR, convert_km_h_to_m_s
+from ainter.models.nagel_schreckenberg.units import discretize_length, PhysicalLength, PhysicalSpeed, DiscreteSpeed, \
+    DiscreteLength, ROAD_COLOR, convert_km_h_to_m_s
 from ainter.models.vehicles.vehicle import VehicleId, NULL_VEHICLE_ID
 
 
@@ -32,18 +32,14 @@ class Road:
                         edge_info: dict[str, Any]) -> Self:
 
         osm_id = edge_info['osmid']
-        lanes = int(edge_info.get('lanes', '1'))
+        lanes = edge_info['lanes']
         length = edge_info['length']
         cells_num = discretize_length(length)
-        max_speed = convert_km_h_to_m_s(float(edge_info.get('max_speed', DEFAULT_ROAD_MAX_SPEED)))
-        name = edge_info.get('name', None)
-        name = name if name != '' else None
+        max_speed = convert_km_h_to_m_s(edge_info['max_speed'])
+        name = edge_info['name']
         is_oneway = edge_info['oneway']
         is_reversed = edge_info['reversed']
-        geometry = edge_info.get('geometry', None)
-        if geometry is None:
-            geometry = LineString(coordinates=[[start_node_info['x'], start_node_info['y']],
-                                               [end_node_info['x'], end_node_info['y']]])
+        geometry = edge_info['geometry']
 
         return cls(osm_id=osm_id,
                    grid=np.zeros(shape=(cells_num, lanes), dtype=np.uint16),
