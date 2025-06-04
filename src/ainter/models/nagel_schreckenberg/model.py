@@ -79,8 +79,10 @@ class NaSchUrbanModel(Model, VehicleModel):
         return len(self.agents)
 
     def step(self) -> None:
-        minutes = self.time - self.start_time
-        print(f"{minutes // 60:02d}:{minutes % 60:02d}")
+        hours = self.time // 3600
+        minutes = (self.time % 3600) // 60
+        seconds = self.time % 60
+        print(f"{hours:02d}:{minutes:02d}:{seconds:02d}")
         if self.random.random() < self.agent_spawn_probability(self.time):
             _ = self.spawn_agent()
 
