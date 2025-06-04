@@ -107,7 +107,7 @@ def get_time_density_strategy(code: str) -> TimeDensity:
             return NormalTimeDensity()
 
         case "uniform_dist":
-            return UniformTimeDensity(0.2)
+            return UniformTimeDensity(0.02)
 
         case "null_dist":
             return UniformTimeDensity(0.)

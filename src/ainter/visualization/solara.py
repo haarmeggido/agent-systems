@@ -22,7 +22,7 @@ def set_environment_config(env_config: EnvConfig) -> None:
     shared_env_config = {
         "seed": {
             "type": "InputText",
-            "value": 69,
+            "value": 1,
             "label": "Random Seed",
         },
         "env_config": env_config,

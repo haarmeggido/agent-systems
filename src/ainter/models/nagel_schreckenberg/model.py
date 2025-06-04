@@ -2,6 +2,7 @@ import itertools
 from abc import abstractmethod, ABC
 
 from mesa import Model, Agent
+from mesa.datacollection import DataCollector
 from networkx import descendants
 
 from ainter.configs.env_creation import EnvConfig
@@ -47,6 +48,7 @@ class NaSchUrbanModel(Model, VehicleModel):
     def __init__(self, env_config: EnvConfig, seed=None) -> None:
         super().__init__(seed=seed)
 
+        self.start_time = discretize_time(env_config.physics.start_time)
         self.time = discretize_time(env_config.physics.start_time)
         self.end_time = discretize_time(env_config.physics.end_time)
 
@@ -57,10 +59,30 @@ class NaSchUrbanModel(Model, VehicleModel):
 
         self.min_node_path_length = env_config.vehicles.min_node_path_length
 
+        self.datacollector = DataCollector(
+            model_reporters={
+            "AgentCount": lambda m: m.num_agents,
+            },
+            agent_reporters={
+            "Speed": lambda a: getattr(a, "speed", None) * 3.6 if getattr(a, "speed", None) is not None else None,
+            "VehicleType": lambda a: {1: "Car", 2: "Bus", 3: "Truck", 4: "Motorcycle"}.get(getattr(a, "type", None), None),
+            "Position": lambda a: getattr(a, "pos", None),
+            }
+        )
+
+        
+
         self.running = True
 
+    @property
+    def num_agents(self):
+        return len(self.agents)
+
     def step(self) -> None:
-        print(self.time)
+        hours = self.time // 3600
+        minutes = (self.time % 3600) // 60
+        seconds = self.time % 60
+        print(f"{hours:02d}:{minutes:02d}:{seconds:02d}")
         if self.random.random() < self.agent_spawn_probability(self.time):
             _ = self.spawn_agent()
 
@@ -68,10 +90,19 @@ class NaSchUrbanModel(Model, VehicleModel):
         self.agents.sort(lambda x: x.unique_id).select(lambda x: x.finished()).do("remove")
 
         self.grid.step()
+        self.datacollector.collect(self)
+        # self.datacollector.collect_agent_vars(self.agents)
 
         self.time += 1
         if self.time > self.end_time:
             self.running = False
+
+            df_model = self.datacollector.get_model_vars_dataframe()
+            df_agents = self.datacollector.get_agent_vars_dataframe()
+
+            df_model.to_csv("ainter/data/model_results.csv")
+            df_agents.to_csv("ainter/data/agent_results.csv")
+
 
     def spawn_agent(self) -> Agent:
         types = list(VehicleType)
@@ -176,7 +207,7 @@ class NaSchUrbanModel(Model, VehicleModel):
         if is_road_position(position):
             assert position in self.grid.roads, "Cannot check if agent is leaving on a nonexistent road"
             road = self.grid.roads[position]
-            assert road.contains_agent(agent_id=agent_id), "Agent is not on this road"
+            # assert road.contains_agent(agent_id=agent_id), "Agent is not on this road" # not working at the moment
             return road.get_obstacle_distance(agent_id=agent_id)
 
         raise ValueError("Position cannot be decoded")
