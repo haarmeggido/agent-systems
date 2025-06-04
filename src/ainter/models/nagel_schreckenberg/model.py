@@ -150,22 +150,21 @@ class NaSchUrbanModel(Model, VehicleModel):
 
         raise ValueError("Position cannot be decoded")
 
-    def move_agent(self, position: Position, agent_id: VehicleId, speed: DiscreteSpeed) -> None:
+    def move_agent(self, position: Position, agent_id: VehicleId, speed: DiscreteSpeed) -> DiscreteSpeed:
         if is_intersection_position(position):
             assert position in self.grid.intersections, "Agent cannot move on a nonexistent intersection"
             intersection = self.grid.intersections[position]
             assert intersection.contains_agent(agent_id=agent_id), "Agent is not on this intersection"
-            intersection.move_agent(agent_id=agent_id,
-                                    speed=speed)
+            return intersection.move_agent(agent_id=agent_id,
+                                           speed=speed)
 
         elif is_road_position(position):
             assert position in self.grid.roads, "Agent cannot move on a nonexistent road"
             road = self.grid.roads[position]
             assert road.contains_agent(agent_id=agent_id), "Agent is not on this road"
-            road.move_agent(agent_id=agent_id, speed=speed)
+            return road.move_agent(agent_id=agent_id, speed=speed)
 
-        else:
-            raise ValueError("Position cannot be decoded")
+        raise ValueError("Position cannot be decoded")
 
     def get_obstacle_distance(self, position: Position, agent_id: VehicleId) -> DiscreteLength:
         if is_intersection_position(position):
@@ -186,7 +185,7 @@ class NaSchUrbanModel(Model, VehicleModel):
         if is_intersection_position(position):
             assert position in self.grid.intersections, "Cannot check if agent is leaving on a nonexistent intersection"
             intersection = self.grid.intersections[position]
-            assert not intersection.contains_agent(agent_id=agent_id), "Agent is on this intersection"
+            # assert not intersection.contains_agent(agent_id=agent_id), "Agent is on this intersection"
             return intersection.can_accept_agent(agent_id=agent_id, length=length)
 
         if is_road_position(position):

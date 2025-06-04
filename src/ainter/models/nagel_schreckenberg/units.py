@@ -18,7 +18,7 @@ type DiscreteAcceleration = np.int8             # In grid cells per time step sq
 DELTA_TIME: Final[float] = np.float64(1.)
 
 CELL_SIZE: Final[PhysicalLength] = np.float64(2.)
-LINE_WIDTH: Final[PhysicalLength] = np.float32(4.)
+LINE_WIDTH: Final[PhysicalLength] = np.float32(6.)
 
 SPEED_MAX: Final[PhysicalSpeed] = np.float64(50)
 SPEED_MIN: Final[PhysicalSpeed] = np.float64(-10)

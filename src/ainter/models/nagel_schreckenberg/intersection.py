@@ -167,7 +167,9 @@ class Intersection:
 
     def move_agent(self, agent_id: VehicleId, speed: DiscreteSpeed) -> None:
         if self.is_end_of_the_road():
-            return
+            return speed
+
+        return speed
 
     def is_agent_leaving(self, agent_id: VehicleId, speed: DiscreteSpeed) -> bool:
         if self.is_end_of_the_road():

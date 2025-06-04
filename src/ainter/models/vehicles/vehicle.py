@@ -106,27 +106,31 @@ class Vehicle(Agent):
             raise ValueError("Agent should be removed")
 
         distance = int(self.model.get_obstacle_distance(self.pos, self.unique_id))
-        self.speed = self.decide_speed(distance)
-        self.model.move_agent(position=self.pos,
-                              agent_id=self.unique_id,
-                              speed=self.speed)
+        self.speed = self.model.move_agent(position=self.pos,
+                                           agent_id=self.unique_id,
+                                           speed=self.decide_speed(distance))
 
         if self.model.is_agent_leaving(position=self.pos,
                                        agent_id=self.unique_id,
                                        speed=self.speed):
+            new_pos = self.calc_new_pos()
+
+            if not self.model.can_accept_agent(position=new_pos,
+                                               agent_id=self.unique_id,
+                                               length=self.type.get_characteristic().length):
+                return
+
             self.model.remove_agent_from_environment(position=self.pos,
                                                      agent_id=self.unique_id)
             if self.is_on_intersection():
-                current_journey_index = self.path.index(self.pos)
-                self.pos = (self.path[current_journey_index], self.path[current_journey_index + 1])
+                self.pos = new_pos
                 _ = self.model.add_agent_to_environment(position=self.pos,
                                                         agent_id=self.unique_id,
                                                         color=self.color,
                                                         length=self.type.get_characteristic().length)
 
             elif self.is_on_road():
-                current_journey_index = self.path.index(self.pos[1])
-                self.pos = self.path[current_journey_index]
+                self.pos = new_pos
                 _ = self.model.add_agent_to_environment(position=self.pos,
                                                         agent_id=self.unique_id)
 
@@ -164,3 +168,14 @@ class Vehicle(Agent):
 
     def is_on_road(self) -> bool:
         return is_road_position(self.pos)
+
+    def calc_new_pos(self) -> Position:
+        if self.is_on_intersection():
+            current_journey_index = self.path.index(self.pos)
+            return self.path[current_journey_index], self.path[current_journey_index + 1]
+        elif self.is_on_road():
+            current_journey_index = self.path.index(self.pos[1])
+            return self.path[current_journey_index]
+
+        raise ValueError("Unknown possition value")
+

@@ -70,7 +70,7 @@ class Road:
         self.render_lut[agent_id] = ROAD_COLOR
         self.grid = np.where(self.grid == agent_id, NULL_VEHICLE_ID, self.grid)
 
-    def move_agent(self, agent_id: VehicleId, speed: DiscreteSpeed) -> None:
+    def move_agent(self, agent_id: VehicleId, speed: DiscreteSpeed) -> DiscreteSpeed:
         assert self.contains_agent(agent_id), "Road must contain this agent"
 
         if speed < 0 or speed > self.grid.shape[0]:
@@ -79,6 +79,8 @@ class Road:
         agent_start = np.where(self.grid == agent_id)[0][0]
         agent_lane = np.where(self.grid == agent_id)[1][0]
         agent_length = np.sum(self.grid == agent_id)
+
+        speed = min(speed, self.get_length_to_obstacle(agent_id))
 
         self.grid[agent_start:agent_start + agent_length, agent_lane] = NULL_VEHICLE_ID
         if agent_start + agent_length + speed > self.grid.shape[0]:
@@ -89,6 +91,7 @@ class Road:
             self.grid[agent_start + speed:agent_start + agent_length + speed, agent_lane] = agent_id
 
         assert self.contains_agent(agent_id), "Road must contain this agent"
+        return speed
 
     def get_length_to_obstacle(self, agent_id: VehicleId) -> DiscreteLength:
         agent_start = np.where(self.grid == agent_id)[0][0]
