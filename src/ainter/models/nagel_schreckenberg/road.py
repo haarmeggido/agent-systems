@@ -7,6 +7,7 @@ from shapely import LineString
 from ainter.models.nagel_schreckenberg.units import discretize_length, PhysicalLength, PhysicalSpeed, DiscreteSpeed, \
     DiscreteLength, ROAD_COLOR, convert_km_h_to_m_s
 from ainter.models.vehicles.vehicle import VehicleId, NULL_VEHICLE_ID
+from ainter.models.autonomous_intersection.lane_directions import LaneDirections
 
 
 @dataclass(slots=True)
@@ -137,3 +138,26 @@ class Road:
                 break
 
         return distance_to_obstacle
+
+    def get_possible_lanes(self, direction: LaneDirections) -> set[int]:
+        assert self.lanes > 0, 'Lanes number cannot bne negative'
+        if self.lanes == 1:
+            return {0}
+
+        if self.lanes == 2:
+            if direction == LaneDirections.LEFT:
+                return {0}
+            if direction == LaneDirections.RIGHT:
+                return {1}
+            if direction == LaneDirections.STRAIGHT:
+                return {0, 1}
+
+        if self.lanes == 3:
+            if direction == LaneDirections.LEFT:
+                return {0}
+            if direction == LaneDirections.RIGHT:
+                return {2}
+            if direction == LaneDirections.STRAIGHT:
+                return {0, 1}
+
+        raise ValueError("Too many lanes")

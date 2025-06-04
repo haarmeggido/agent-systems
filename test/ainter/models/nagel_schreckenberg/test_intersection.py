@@ -29,21 +29,25 @@ def test_cardinal_directions(intersection_data):
         # EAST
         (456, 123): {
             'geometry': LineString([[120.0, 100.0], [100.0, 100.0]]),
+            'name': 'abc',
             'lanes': 2
         },
         # NORTH
         (123, 789): {
             'geometry': LineString([[100.0, 100.0], [100.0, 120.0]]),
+            'name': 'abc',
             'lanes': 1
         },
         # WEST
         (101, 123): {
             'geometry': LineString([[080.0, 100.0], [100.0, 100.0]]),
+            'name': 'abc',
             'lanes': 3
         },
         # SOUTH
         (123, 202): {
             'geometry': LineString([[100.0, 100.0], [100.0, 80.0]]),
+            'name': 'abc',
             'lanes': 2
         }
     }
@@ -77,10 +81,12 @@ def test_diagonal_directions(intersection_data):
     edges_info = {
         (123, 456): {
             'geometry': LineString([[100.0, 100.0], [110.0, 115.0]]),
+            'name': 'abc',
             'lanes': 1
         },
         (123, 789): {
             'geometry': LineString([[100.0, 100.0], [115.0, 90.0]]),
+            'name': 'abc',
             'lanes': 2
         }
     }
@@ -99,14 +105,17 @@ def test_edge_case_angles(intersection_data):
     edges_info = {
         (123, 456): {
             'geometry': LineString([[100.0, 100.0], [110.0, 110.0]]),
+            'name': 'abc',
             'lanes': 1
         },
         (123, 789): {
             'geometry': LineString([[100.0, 100.0], [90.0, 110.0]]),
+            'name': 'abc',
             'lanes': 1
         },
         (123, 101): {
             'geometry': LineString([[100.0, 100.0], [90.0, 90.0]]),
+            'name': 'abc',
             'lanes': 1
         }
     }
@@ -126,10 +135,12 @@ def test_duplicate_directions_error(intersection_data):
     edges_info = {
         (456, 123): {
             'geometry': LineString([[120.0, 100.0], [100.0, 100.0]]),
+            'name': 'abc',
             'lanes': 2
         },
         (789, 123): {
             'geometry': LineString([[130.0, 105.0], [100.0, 100.0]]),
+            'name': 'abc',
             'lanes': 1
         }
     }
@@ -147,41 +158,49 @@ def test_all_directions_with_incoming_outgoing(intersection_data):
         # Wchodząca ze wschodu
         (456, 123): {
             'geometry': LineString([[120.0, 100.0], [100.0, 100.0]]),
+            'name': 'abc',
             'lanes': 2
         },
         # Wychodząca na wschód
         (123, 457): {
             'geometry': LineString([[100.0, 100.0], [120.0, 100.0]]),
+            'name': 'abc',
             'lanes': 1
         },
         # Wchodząca z północy
         (789, 123): {
             'geometry': LineString([[100.0, 120.0], [100.0, 100.0]]),
+            'name': 'abc',
             'lanes': 1
         },
         # Wychodząca na północ
         (123, 790): {
             'geometry': LineString([[100.0, 100.0], [100.0, 120.0]]),
+            'name': 'abc',
             'lanes': 2
         },
         # Wchodząca z zachodu
         (101, 123): {
             'geometry': LineString([[80.0, 100.0], [100.0, 100.0]]),
+            'name': 'abc',
             'lanes': 2
         },
         # Wychodząca na zachód
         (123, 102): {
             'geometry': LineString([[100.0, 100.0], [80.0, 100.0]]),
+            'name': 'abc',
             'lanes': 1
         },
         # Wchodząca z południa
         (201, 123): {
             'geometry': LineString([[100.0, 80.0], [100.0, 100.0]]),
+            'name': 'abc',
             'lanes': 1
         },
         # Wychodząca na południe
         (123, 202): {
             'geometry': LineString([[100.0, 100.0], [100.0, 80.0]]),
+            'name': 'abc',
             'lanes': 2
         }
     }
