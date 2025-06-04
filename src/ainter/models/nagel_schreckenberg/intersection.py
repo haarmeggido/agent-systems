@@ -9,6 +9,7 @@ from ainter.models.autonomous_intersection.traffic_lights import SimpleTrafficLi
 from ainter.models.nagel_schreckenberg.units import DiscreteSpeed, ROAD_COLOR, DiscreteLength, discretize_length, \
     DiscreteTime, LINE_WIDTH
 from ainter.models.vehicles.vehicle import VehicleId
+from ainter.models.autonomous_intersection.lane_directions import LaneDirections
 
 RED_LIGHT_COLOR = np.array([255, 0, 0], dtype=np.uint8)
 GREEN_LIGHT_COLOR = np.array([0, 255, 0], dtype=np.uint8)
@@ -166,7 +167,9 @@ class Intersection:
 
     def move_agent(self, agent_id: VehicleId, speed: DiscreteSpeed) -> None:
         if self.is_end_of_the_road():
-            return
+            return speed
+
+        return speed
 
     def is_agent_leaving(self, agent_id: VehicleId, speed: DiscreteSpeed) -> bool:
         if self.is_end_of_the_road():
@@ -228,3 +231,6 @@ class Intersection:
 
     def is_end_of_the_road(self) -> bool:
         return self.grid.shape[0] == 0 or self.grid.shape[1] == 0
+
+    def get_direction_to(self, start_node: int, end_node: int) -> LaneDirections:
+        pass

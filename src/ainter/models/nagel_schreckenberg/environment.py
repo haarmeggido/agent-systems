@@ -9,6 +9,7 @@ from ainter.models.nagel_schreckenberg.intersection import Intersection
 from ainter.models.nagel_schreckenberg.road import Road
 from ainter.models.nagel_schreckenberg.units import DEFAULT_ROAD_MAX_SPEED, DiscreteTime
 from ainter.models.vehicles.vehicle import RoadPosition, IntersectionPosition
+from ainter.models.autonomous_intersection.lane_directions import LaneDirections
 
 
 def enrich_edge_data(edge_data: dict[str, Any], start_node_data: dict[str, Any], end_node_data: dict[str, Any])-> None:
@@ -80,3 +81,6 @@ class Environment:
     def step(self) -> None:
         for inter in self.intersections.values():
             inter.step()
+
+    def get_direction(self, intersection_node: int, next_node: int) -> LaneDirections:
+        pass
