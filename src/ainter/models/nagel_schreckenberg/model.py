@@ -51,7 +51,7 @@ class NaSchUrbanModel(Model, VehicleModel):
         self.end_time = discretize_time(env_config.physics.end_time)
 
         self.graph = get_data_from_bbox(env_config.map_box)
-        self.grid = Environment.from_directed_graph(self.graph, self.time)
+        self.grid = Environment.from_directed_graph(self.graph, self.time, self.random)
 
         self.agent_spawn_probability: TimeDensity = env_config.vehicles.time_density_strategy
 
@@ -66,6 +66,8 @@ class NaSchUrbanModel(Model, VehicleModel):
 
         self.agents.sort(lambda x: x.unique_id).do("step")
         self.agents.sort(lambda x: x.unique_id).select(lambda x: x.finished()).do("remove")
+
+        self.grid.step()
 
         self.time += 1
         if self.time > self.end_time:

@@ -41,7 +41,7 @@ def create_roads_from_graph(graph: MultiDiGraph, graph_di: DiGraph) -> dict[tupl
         roads.update({(start_id, end_id): new_road})
     return roads
 
-def create_intersections_from_graph(graph_di: DiGraph, global_time: DiscreteTime) -> dict[int, Intersection]:
+def create_intersections_from_graph(graph_di: DiGraph, global_time: DiscreteTime, rng) -> dict[int, Intersection]:
     intersections = dict()
     for node_id in graph_di.nodes:
         node_data = graph_di.nodes[node_id]
@@ -51,7 +51,8 @@ def create_intersections_from_graph(graph_di: DiGraph, global_time: DiscreteTime
         new_intersection = Intersection.from_graph_data(osm_id=node_id,
                                                         edges_info=edges_data,
                                                         node_info=node_data,
-                                                        global_time=global_time)
+                                                        global_time=global_time,
+                                                        rng=rng)
         intersections.update({node_id: new_intersection})
     return intersections
 
@@ -63,15 +64,19 @@ class Environment:
     roads: dict[RoadPosition, Road]
 
     @classmethod
-    def from_directed_graph(cls, graph: MultiDiGraph, global_time: DiscreteTime) -> Self:
+    def from_directed_graph(cls, graph: MultiDiGraph, global_time: DiscreteTime, rng) -> Self:
         assert all(map(lambda x: x[2] == 0, graph.edges)), 'The convertion to DiGraph would result in information loss'
 
         graph_di = DiGraph(graph)
         graph_di = enrich_with_defaults(graph_di)
 
         roads = create_roads_from_graph(graph, graph_di)
-        intersections = create_intersections_from_graph(graph_di, global_time)
+        intersections = create_intersections_from_graph(graph_di, global_time, rng)
 
         return cls(road_graph=graph_di,
                    roads=roads,
                    intersections=intersections)
+
+    def step(self) -> None:
+        for inter in self.intersections.values():
+            inter.step()

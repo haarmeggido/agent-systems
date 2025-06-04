@@ -22,5 +22,6 @@ class IntersectionEntranceDirection(IntEnum):
 @dataclass(slots=True)
 class IntersectionDirection:
     direction: IntersectionEntranceDirection
+    name: str
     action_slice: tuple[slice, slice] | None
     lanes: int

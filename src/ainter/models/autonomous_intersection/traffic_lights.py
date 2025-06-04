@@ -43,3 +43,4 @@ class SimpleTrafficLight(TrafficLight):
 
     def step(self) -> None:
         self.time += 1
+

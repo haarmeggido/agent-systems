@@ -56,7 +56,7 @@ def dummy_model(monkeypatch, graph, env_config, seed):
         self.end_time = discretize_time(env_config.physics.end_time)
 
         self.graph = graph
-        self.grid = Environment.from_directed_graph(self.graph, self.time)
+        self.grid = Environment.from_directed_graph(self.graph, self.time, self.random)
 
         self.agent_spawn_probability: TimeDensity = env_config.vehicles.time_density_strategy
 
