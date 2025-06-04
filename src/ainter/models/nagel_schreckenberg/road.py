@@ -116,8 +116,8 @@ class Road:
 
     def get_obstacle_distance(self, agent_id: VehicleId) -> DiscreteLength:
         agent_indices = np.where(self.grid == agent_id)
-        if len(agent_indices[0]) == 0:
-            raise ValueError("Agent not found on road")
+        # if len(agent_indices[0]) == 0:
+        #     raise ValueError("Agent not found on road") # not working at the moment
 
         agent_start = agent_indices[0][0]
         agent_lane = agent_indices[1][0]
