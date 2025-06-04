@@ -48,6 +48,7 @@ class NaSchUrbanModel(Model, VehicleModel):
     def __init__(self, env_config: EnvConfig, seed=None) -> None:
         super().__init__(seed=seed)
 
+        self.start_time = discretize_time(env_config.physics.start_time)
         self.time = discretize_time(env_config.physics.start_time)
         self.end_time = discretize_time(env_config.physics.end_time)
 
@@ -60,11 +61,12 @@ class NaSchUrbanModel(Model, VehicleModel):
 
         self.datacollector = DataCollector(
             model_reporters={
-                "AgentCount": lambda m: m.num_agents,
+            "AgentCount": lambda m: m.num_agents,
             },
             agent_reporters={
-                "Speed": lambda a: getattr(a, "speed", None),
-                "VehicleType": lambda a: getattr(a, "type", None)
+            "Speed": lambda a: getattr(a, "speed", None) * 3.6 if getattr(a, "speed", None) is not None else None,
+            "VehicleType": lambda a: {1: "Car", 2: "Bus", 3: "Truck", 4: "Motorcycle"}.get(getattr(a, "type", None), None),
+            "Position": lambda a: getattr(a, "pos", None),
             }
         )
 
@@ -77,7 +79,8 @@ class NaSchUrbanModel(Model, VehicleModel):
         return len(self.agents)
 
     def step(self) -> None:
-        print(self.time)
+        minutes = self.time - self.start_time
+        print(f"{minutes // 60:02d}:{minutes % 60:02d}")
         if self.random.random() < self.agent_spawn_probability(self.time):
             _ = self.spawn_agent()
 
