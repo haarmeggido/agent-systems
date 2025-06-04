@@ -100,8 +100,8 @@ class NaSchUrbanModel(Model, VehicleModel):
             df_model = self.datacollector.get_model_vars_dataframe()
             df_agents = self.datacollector.get_agent_vars_dataframe()
 
-            df_model.to_csv("ainter/data/model_results.csv")
-            df_agents.to_csv("ainter/data/agent_results.csv")
+            df_model.to_csv("src/ainter/data/model_results.csv")
+            df_agents.to_csv("src/ainter/data/agent_results.csv")
 
 
     def spawn_agent(self) -> Agent:
@@ -207,7 +207,7 @@ class NaSchUrbanModel(Model, VehicleModel):
         if is_road_position(position):
             assert position in self.grid.roads, "Cannot check if agent is leaving on a nonexistent road"
             road = self.grid.roads[position]
-            # assert road.contains_agent(agent_id=agent_id), "Agent is not on this road" # not working at the moment
+            assert road.contains_agent(agent_id=agent_id), "Agent is not on this road" # not working at the moment
             return road.get_obstacle_distance(agent_id=agent_id)
 
         raise ValueError("Position cannot be decoded")
