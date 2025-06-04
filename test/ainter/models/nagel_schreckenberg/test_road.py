@@ -10,11 +10,11 @@ from mesa import Model
 from shapely import LineString
 
 from ainter.configs.env_creation import EnvConfig, PhysicsConfig, VehiclesConfig, MapBoxConfig
-from ainter.models.nagel_schreckenberg.environment import Environment
+from ainter.models.nagel_schreckenberg.environment import Environment, enrich_edge_data
 from ainter.models.nagel_schreckenberg.model import NaSchUrbanModel
 from ainter.models.nagel_schreckenberg.road import Road
 from ainter.models.nagel_schreckenberg.units import get_time_density_strategy, discretize_time, TimeDensity, ROAD_COLOR, \
-    discretize_length
+    discretize_length, DEFAULT_ROAD_MAX_SPEED
 from ainter.models.vehicles.vehicle import Vehicle, NULL_VEHICLE_ID
 from test.ainter.test_fixtures import seed
 from test.ainter.models.vehicles.test_vehicle import agent_type
@@ -52,11 +52,11 @@ def dummy_model(monkeypatch, graph, env_config, seed):
     def mock_model_init(self, env_config, seed):
         Model.__init__(self, seed=seed)
 
-        self.graph = graph
-        self.grid = Environment.from_directed_graph(self.graph)
-
         self.time = discretize_time(env_config.physics.start_time)
         self.end_time = discretize_time(env_config.physics.end_time)
+
+        self.graph = graph
+        self.grid = Environment.from_directed_graph(self.graph, self.time, self.random)
 
         self.agent_spawn_probability: TimeDensity = env_config.vehicles.time_density_strategy
 
@@ -84,6 +84,7 @@ def road_json(request):
         data = json.load(in_file)
 
     data["geometry"] = LineString(data["geometry"])
+    enrich_edge_data(data, dict(), dict())
 
     road = Road.from_graph_data(dict(x=0.0, y=0.0), dict(x=1.0, y=1.0), data)
     return road
