@@ -97,7 +97,17 @@ class Vehicle(Agent):
         self.from_node = self.path[0]
         self.to_node = self.path[-1]
         self.pos = self.from_node
-        self.color = np.array([self.random.randint(64, 181) for _ in range(3)], dtype=np.uint8)
+        # Generate a bright, high-contrast color (avoid grayish tones)
+        def bright_color():
+            # Pick one channel to be high (220-255), one medium (128-200), one low (0-80)
+            channels = [0, 1, 2]
+            np.random.shuffle(channels)
+            color = [0, 0, 0]
+            color[channels[0]] = self.random.randint(220, 255)
+            color[channels[1]] = self.random.randint(128, 200)
+            color[channels[2]] = self.random.randint(0, 80)
+            return np.array(color, dtype=np.uint8)
+        self.color = bright_color()
         _ = self.model.add_agent_to_environment(position=self.pos, agent_id=self.unique_id)
 
 
