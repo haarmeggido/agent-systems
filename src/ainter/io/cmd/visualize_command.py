@@ -39,7 +39,7 @@ class VisualizeCommand(CMDCommand):
 
     def configure_parser(self, subparser) -> ArgumentParser:
         parser: ArgumentParser = subparser.add_parser(name='visualize',
-                                                      help='Starts the solar visualization server')
+                                                      help='Starts the solara visualization server')
 
         parser.add_argument('-i', '--input',
                             help='Configuration in .JSON format that describes env settings',

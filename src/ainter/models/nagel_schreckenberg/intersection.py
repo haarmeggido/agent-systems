@@ -1,3 +1,4 @@
+import random
 from dataclasses import dataclass, field
 from typing import Self, Any
 
@@ -8,7 +9,7 @@ from ainter.models.autonomous_intersection.intersection_directions import Inters
 from ainter.models.autonomous_intersection.traffic_lights import SimpleTrafficLight, TrafficLight
 from ainter.models.nagel_schreckenberg.units import DiscreteSpeed, ROAD_COLOR, DiscreteLength, discretize_length, \
     DiscreteTime, LINE_WIDTH
-from ainter.models.vehicles.vehicle import VehicleId
+from ainter.models.vehicles.vehicle import VehicleId, NULL_VEHICLE_ID
 from ainter.models.autonomous_intersection.lane_directions import LaneDirections
 
 RED_LIGHT_COLOR = np.array([255, 0, 0], dtype=np.uint8)
@@ -160,14 +161,26 @@ class Intersection:
     def add_agent(self, agent_id: VehicleId) -> None:
         if self.is_end_of_the_road():
             return
+        self.render_lut[agent_id] = np.array([random.randint(64, 181) for _ in range(3)], dtype=np.uint8)
 
     def remove_agent(self, agent_id: VehicleId) -> None:
         if self.is_end_of_the_road():
             return
+        self.render_lut[agent_id] = ROAD_COLOR
 
     def move_agent(self, agent_id: VehicleId, speed: DiscreteSpeed) -> None:
         if self.is_end_of_the_road():
             return speed
+
+        if random.uniform(0., 1.) < 0.1:
+            self.grid[:] = NULL_VEHICLE_ID
+
+            if random.uniform(0., 1.) < 0.5:
+                middle_y = self.grid.shape[0] // 2
+                self.grid[middle_y, 2:4] = agent_id
+            else:
+                middle_x = self.grid.shape[1] // 2
+                self.grid[3:6, middle_x] = agent_id
 
         return speed
 
